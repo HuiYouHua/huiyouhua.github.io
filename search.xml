@@ -1,69 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>hello-world-1</title>
-    <url>/2022/04/29/hello-world-1/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id=""><a href="#" class="headerlink" title=" "></a> </h3>]]></content>
-  </entry>
-  <entry>
-    <title>hello-world3</title>
-    <url>/2022/04/29/hello-world3/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id=""><a href="#" class="headerlink" title=" "></a> </h3>]]></content>
-      <categories>
-        <category>分类3</category>
-      </categories>
-      <tags>
-        <tag>标签3</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>hello-world2</title>
-    <url>/2022/04/29/hello-world2/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id=""><a href="#" class="headerlink" title=" "></a> </h3>]]></content>
-      <categories>
-        <category>分类3</category>
-      </categories>
-      <tags>
-        <tag>标签3</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>hello-world4</title>
-    <url>/2022/04/29/hello-world4/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id=""><a href="#" class="headerlink" title=" "></a> </h3>]]></content>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/2022/04/28/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+    <title>孤勇者</title>
+    <url>/2022/04/29/%E5%AD%A4%E5%8B%87%E8%80%85/</url>
+    <content><![CDATA[<p>都 是勇敢的</p>
+<p>你额头的伤口 你的 不同 你犯的错</p>
+<p>都 不必隐藏<br>你破旧的玩偶 你的 面具 你的自我</p>
+<p>他们说 要带着光 驯服每一头怪兽<br>他们说 要缝好你的伤 没有人爱小丑<br>为何孤独 不可 光荣<br>人只有不完美 值得歌颂<br>谁说污泥满身的不算英雄</p>
+<p>爱你孤身走暗巷<br>爱你不跪的模样<br>爱你对峙过绝望<br>不肯哭一场</p>
+<p>爱你破烂的衣裳<br>却敢堵命运的枪<br>爱你和我那么像<br>缺口都一样</p>
+<p>去吗？配吗？这褴褛的披风<br>战吗？战啊！以最卑微的梦<br>致那黑夜中的呜咽与怒吼<br>谁说站在光里的才算英雄</p>
+<p>他们说 要戒了你的狂 就像擦掉了污垢<br>他们说 要顺台阶而上 而代价是低头<br>那就让我 不可 乘风<br>你一样骄傲着 那种孤勇<br>谁说对弈平凡的不算英雄</p>
+<p>爱你孤身走暗巷<br>爱你不跪的模样<br>爱你对峙过绝望<br>不肯哭一场</p>
+<p>爱你破烂的衣裳<br>却敢堵命运的枪<br>爱你和我那么像<br>缺口都一样</p>
+<p>去吗？配吗？这褴褛的披风<br>战吗？战啊！以最卑微的梦<br>致那黑夜中的呜咽与怒吼<br>谁说站在光里的才算英雄</p>
+<p>你的斑驳 与众不同<br>你的沉默 震耳欲聋 You Are The Hero</p>
+<p>爱你孤身走暗巷<br>爱你不跪的模样<br>爱你对峙过绝望<br>不肯哭一场 (You Are The Hero)</p>
+<p>爱你来自于蛮荒<br>一生不借谁的光<br>你将造你的城邦<br>在废墟之上</p>
+<p>去吗？去啊！以最卑微的梦<br>战吗？战啊！以最孤高的梦<br>致那黑夜中的呜咽与怒吼<br>谁说站在光里的才算英雄</p>
 ]]></content>
       <categories>
-        <category>分类1</category>
-        <category>分类2</category>
+        <category>歌曲</category>
       </categories>
       <tags>
-        <tag>标签1</tag>
-        <tag>标签2</tag>
+        <tag>歌词</tag>
       </tags>
   </entry>
 </search>
