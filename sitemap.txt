@@ -3,8 +3,8 @@ http://example.com/tags/index.html
 http://example.com/archives/index.html
 http://example.com/categories/index.html
 http://example.com/about/index.html
-http://example.com/2021/04/30/%E4%BA%8C%E3%80%81SwiftUI%E4%B9%8BText%E6%8E%A7%E4%BB%B6/
-http://example.com/2021/04/29/%E4%B8%80%E3%80%81SwiftUI%E4%B9%8BButton%E6%8E%A7%E4%BB%B6/
+http://example.com/2021/04/30/%E4%BA%8C%E3%80%81SwiftUI%E4%B9%8BButton%E6%8E%A7%E4%BB%B6/
+http://example.com/2021/04/29/%E4%B8%80%E3%80%81SwiftUI%E4%B9%8BText%E6%8E%A7%E4%BB%B6/
 http://example.com/
 http://example.com/tags/iOS/
 http://example.com/tags/%E6%AD%8C%E8%AF%8D/
