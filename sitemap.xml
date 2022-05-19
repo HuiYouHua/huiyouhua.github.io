@@ -56,6 +56,15 @@
   </url>
   
   <url>
+    <loc>http://example.com/2021/04/29/%E4%B8%89%E3%80%81SwiftUI%E4%B9%8BTextField%E6%8E%A7%E4%BB%B6/</loc>
+    
+    <lastmod>2021-04-29</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/2021/04/29/%E4%BA%8C%E3%80%81SwiftUI%E4%B9%8BButton%E6%8E%A7%E4%BB%B6/</loc>
     
     <lastmod>2021-04-29</lastmod>
@@ -67,7 +76,7 @@
 
   <url>
     <loc>http://example.com/</loc>
-    <lastmod>2022-05-17</lastmod>
+    <lastmod>2022-05-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -75,14 +84,14 @@
   
   <url>
     <loc>http://example.com/tags/iOS/</loc>
-    <lastmod>2022-05-17</lastmod>
+    <lastmod>2022-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/%E6%AD%8C%E8%AF%8D/</loc>
-    <lastmod>2022-05-17</lastmod>
+    <lastmod>2022-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -91,14 +100,14 @@
   
   <url>
     <loc>http://example.com/categories/SwiftUI/</loc>
-    <lastmod>2022-05-17</lastmod>
+    <lastmod>2022-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/categories/%E6%AD%8C%E6%9B%B2/</loc>
-    <lastmod>2022-05-17</lastmod>
+    <lastmod>2022-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
