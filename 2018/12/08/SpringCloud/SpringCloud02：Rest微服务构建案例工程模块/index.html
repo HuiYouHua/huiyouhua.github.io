@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本系列对应的是尚硅谷周阳Spring Cloud的思维导图整理的笔记，用来方便自己后面的知识点回顾。分别以每个知识点作为一篇文章详细讲述。  知识点传送门：项目源码  SpringCloud01：微服务概述与SpringCloud SpringCloud02：Rest微服务构建案例工程模块 SpringCloud03：Eureka服务注册与发现 SpringCloud04：Ribbon负载均衡">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud02：Rest微服务构建案例工程模块">
+<meta property="og:url" content="http://example.com/2018/12/08/SpringCloud/SpringCloud02%EF%BC%9ARest%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E5%BB%BA%E6%A1%88%E4%BE%8B%E5%B7%A5%E7%A8%8B%E6%A8%A1%E5%9D%97/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="本系列对应的是尚硅谷周阳Spring Cloud的思维导图整理的笔记，用来方便自己后面的知识点回顾。分别以每个知识点作为一篇文章详细讲述。  知识点传送门：项目源码  SpringCloud01：微服务概述与SpringCloud SpringCloud02：Rest微服务构建案例工程模块 SpringCloud03：Eureka服务注册与发现 SpringCloud04：Ribbon负载均衡">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-07T16:02:53.000Z">
+<meta property="article:modified_time" content="2018-12-07T16:02:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2018/12/08/SpringCloud/SpringCloud02%EF%BC%9ARest%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E5%BB%BA%E6%A1%88%E4%BE%8B%E5%B7%A5%E7%A8%8B%E6%A8%A1%E5%9D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringCloud02：Rest微服务构建案例工程模块 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/08/SpringCloud/SpringCloud02%EF%BC%9ARest%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E5%BB%BA%E6%A1%88%E4%BE%8B%E5%B7%A5%E7%A8%8B%E6%A8%A1%E5%9D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringCloud02：Rest微服务构建案例工程模块
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-08 00:02:53" itemprop="dateCreated datePublished" datetime="2018-12-08T00:02:53+08:00">2018-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringCloud/" itemprop="url" rel="index"><span itemprop="name">SpringCloud</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>本系列对应的是尚硅谷周阳Spring Cloud的思维导图整理的笔记，用来方便自己后面的知识点回顾。分别以每个知识点作为一篇文章详细讲述。</p>
+</blockquote>
+<p>知识点传送门：<br><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/SpringCloud">项目源码</a></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c4c8c19d9f23">SpringCloud01：微服务概述与SpringCloud</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9bc7aa82a07d">SpringCloud02：Rest微服务构建案例工程模块</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/afaef0642065">SpringCloud03：Eureka服务注册与发现</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/952b4895b6ae">SpringCloud04：Ribbon负载均衡</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b2ec4c74ff75">SpringCloud05：Feign负载均衡</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1b4da963374d">SpringCloud06：Hystrix断路器</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/91364d0e535d">SpringCloud07：zuul路由网关</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/31f79b4cd84d">SpringCloud08：SpringCloud Config分布式配置中心</a></li>
+</ul>
+<h1 id="一、总体介绍"><a href="#一、总体介绍" class="headerlink" title="一、总体介绍"></a>一、总体介绍</h1><p>这里以Dept部门模块做一个微服务通用案例Consumer消费者（Client）通过REST调用Provider提供者（Server）提供的服务</p>
+<h2 id="1-Maven的分包分模块架构复习"><a href="#1-Maven的分包分模块架构复习" class="headerlink" title="1.Maven的分包分模块架构复习"></a>1.Maven的分包分模块架构复习</h2><p>一个简单的Maven模块结构是这样的：<br>—— app-parent      一个父项目(app-parent)聚合很多子项目(app-util,app-dao,app-service,app-web)<br>      |—— pom.xml (pom)<br>      |<br>      |———— app-util<br>      | |———— pom.xml (jar)<br>      |<br>      |———— app-dao<br>      | |———— pom.xml (jar)<br>      |<br>      |———— app-service<br>      | |———— pom.xml (jar)<br>      |<br>      |———— app-web<br>        |———— pom.xml (war) </p>
+<p><strong>一个Project带着多个Module子模块</strong><br>MicroServiceCloud父工程（Project）下带着3个子模块（Module）</p>
+<ul>
+<li>microservicecloud-api 封装的整体Entity/接口/公共配置等</li>
+<li>microservicecloud-provider-dept-8001 微服务落地的服务提供者</li>
+<li>microservicecloud-consumer-dept-80 微服务调用的客户端使用</li>
+</ul>
+<h1 id="二、构建步骤"><a href="#二、构建步骤" class="headerlink" title="二、构建步骤"></a>二、构建步骤</h1><h2 id="1-microservicecloud整体父工程Project"><a href="#1-microservicecloud整体父工程Project" class="headerlink" title="1.microservicecloud整体父工程Project"></a>1.microservicecloud整体父工程Project</h2><p>1）新建父工程microservicecloud，切记是Packageing是pom模式<br>2）主要是定义POM文件，将后续各个子模块公用的jar包等统一提出来，类似一个抽象父类<br>3）POM文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line"></span><br><span class="line">  &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;microservicecloud&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">  &lt;packaging&gt;pom&lt;/packaging&gt;</span><br><span class="line"></span><br><span class="line">  &lt;properties&gt;</span><br><span class="line">   &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;</span><br><span class="line">   &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;</span><br><span class="line">   &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;</span><br><span class="line">   &lt;junit.version&gt;4.12&lt;/junit.version&gt;</span><br><span class="line">   &lt;log4j.version&gt;1.2.17&lt;/log4j.version&gt;</span><br><span class="line">   &lt;lombok.version&gt;1.16.18&lt;/lombok.version&gt;</span><br><span class="line">  &lt;/properties&gt;</span><br><span class="line"></span><br><span class="line">  &lt;dependencyManagement&gt;</span><br><span class="line">   &lt;dependencies&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;Dalston.SR1&lt;/version&gt;</span><br><span class="line">       &lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">       &lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;1.5.9.RELEASE&lt;/version&gt;</span><br><span class="line">       &lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">       &lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;5.0.4&lt;/version&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;com.alibaba&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;druid&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;1.0.31&lt;/version&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;1.3.0&lt;/version&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;logback-core&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;1.2.3&lt;/version&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;junit&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;junit&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;$&#123;junit.version&#125;&lt;/version&gt;</span><br><span class="line">       &lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">       &lt;groupId&gt;log4j&lt;/groupId&gt;</span><br><span class="line">       &lt;artifactId&gt;log4j&lt;/artifactId&gt;</span><br><span class="line">       &lt;version&gt;$&#123;log4j.version&#125;&lt;/version&gt;</span><br><span class="line">     &lt;/dependency&gt;</span><br><span class="line">   &lt;/dependencies&gt;</span><br><span class="line">  &lt;/dependencyManagement&gt;</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-microservicecloud-api公共子模块Module"><a href="#2-microservicecloud-api公共子模块Module" class="headerlink" title="2.microservicecloud-api公共子模块Module"></a>2.microservicecloud-api公共子模块Module</h2><p>1）新建microservicecloud-api<br>      创建完成后请回到父工程查看pom文件变化<br>2）修改POM文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line"></span><br><span class="line">  &lt;parent&gt;&lt;!-- 子类里面显示声明才能有明确的继承表现，无意外就是父类的默认版本否则自己定义 --&gt;</span><br><span class="line">   &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;microservicecloud&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">  &lt;/parent&gt;</span><br><span class="line"></span><br><span class="line">  &lt;artifactId&gt;microservicecloud-api&lt;/artifactId&gt;&lt;!-- 当前Module我自己叫什么名字 --&gt;</span><br><span class="line"></span><br><span class="line">  &lt;dependencies&gt;&lt;!-- 当前Module需要用到的jar包，按自己需求添加，如果父类已经包含了，可以不用写版本号 --&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">  &lt;/dependencies&gt;</span><br><span class="line"></span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure><br>3）新建部门Entity且配合lombok使用<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">package com.atguigu.springcloud.entities;</span><br><span class="line"> </span><br><span class="line">import java.io.Serializable;</span><br><span class="line"> </span><br><span class="line">import lombok.Data;</span><br><span class="line">import lombok.NoArgsConstructor;</span><br><span class="line">import lombok.experimental.Accessors;</span><br><span class="line"> </span><br><span class="line">@SuppressWarnings(&quot;serial&quot;)</span><br><span class="line">@NoArgsConstructor</span><br><span class="line">@Data</span><br><span class="line">@Accessors(chain=true)</span><br><span class="line">public class Dept implements Serializable //必须序列化</span><br><span class="line">&#123;</span><br><span class="line">  private Long  deptno;   //主键</span><br><span class="line">  private String  dname;   //部门名称</span><br><span class="line">  private String  db_source;//来自那个数据库，因为微服务架构可以一个服务对应一个数据库，同一个信息被存储到不同数据库</span><br><span class="line">  </span><br><span class="line">  public Dept(String dname)</span><br><span class="line">  &#123;</span><br><span class="line">   super();</span><br><span class="line">   this.dname = dname;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>4）mvn clean install后给其它模块引用，达到通用目的。<br>也即需要用到部门实体的话，不用每个工程都定义一份，直接引用本模块即可。</p>
+<h2 id="3-microservicecloud-provider-dept-8001-部门微服务提供者Module"><a href="#3-microservicecloud-provider-dept-8001-部门微服务提供者Module" class="headerlink" title="3.microservicecloud-provider-dept-8001  部门微服务提供者Module"></a>3.microservicecloud-provider-dept-8001  部门微服务提供者Module</h2><p>1）新建microservicecloud-provider-dept-8001<br>      创建完成后请回到父工程查看pom文件变化<br>2）修改POM文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line"></span><br><span class="line">  &lt;parent&gt;</span><br><span class="line">   &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;microservicecloud&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">  &lt;/parent&gt;</span><br><span class="line"></span><br><span class="line">  &lt;artifactId&gt;microservicecloud-provider-dept-8001&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">  &lt;dependencies&gt;</span><br><span class="line">   &lt;dependency&gt;&lt;!-- 引入自己定义的api通用包，可以使用Dept部门Entity --&gt;</span><br><span class="line">     &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;microservicecloud-api&lt;/artifactId&gt;</span><br><span class="line">     &lt;version&gt;$&#123;project.version&#125;&lt;/version&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;junit&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;junit&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;com.alibaba&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;druid&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;logback-core&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;!-- 修改后立即生效，热部署 --&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;springloaded&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">  &lt;/dependencies&gt;</span><br><span class="line"></span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure><br>3）创建YML文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8001</span><br><span class="line">  </span><br><span class="line">mybatis:</span><br><span class="line">  config-location: classpath:mybatis/mybatis.cfg.xml        # mybatis配置文件所在路径</span><br><span class="line">  type-aliases-package: com.atguigu.springcloud.entities    # 所有Entity别名类所在包</span><br><span class="line">  mapper-locations:</span><br><span class="line">  - classpath:mybatis/mapper/**/*.xml                       # mapper映射文件</span><br><span class="line">    </span><br><span class="line">spring:</span><br><span class="line">   application:</span><br><span class="line">    name: microservicecloud-dept </span><br><span class="line">   datasource:</span><br><span class="line">    type: com.alibaba.druid.pool.DruidDataSource            # 当前数据源操作类型</span><br><span class="line">    driver-class-name: org.gjt.mm.mysql.Driver              # mysql驱动包</span><br><span class="line">    url: jdbc:mysql://localhost:3306/cloudDB01              # 数据库名称</span><br><span class="line">    username: root</span><br><span class="line">    password: 123456</span><br><span class="line">    dbcp2:</span><br><span class="line">      min-idle: 5                                           # 数据库连接池的最小维持连接数</span><br><span class="line">      initial-size: 5                                       # 初始化连接数</span><br><span class="line">      max-total: 5                                          # 最大连接数</span><br><span class="line">      max-wait-millis: 200                                  # 等待连接获取的最大超时时间</span><br></pre></td></tr></table></figure><br>4）工程src/main/resources目录下新建mybatis文件夹后新建mybatis.cfg.xml文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE configuration</span><br><span class="line">  PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;</span><br><span class="line">  &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;</span><br><span class="line">  </span><br><span class="line">&lt;configuration&gt;</span><br><span class="line">  &lt;settings&gt;</span><br><span class="line">   &lt;setting name=&quot;cacheEnabled&quot; value=&quot;true&quot;/&gt;&lt;!-- 二级缓存开启 --&gt;</span><br><span class="line">  &lt;/settings&gt;</span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure><br>5）MySQL创建部门数据库脚本<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE IF EXISTS cloudDB01;</span><br><span class="line">CREATE DATABASE cloudDB01 CHARACTER SET UTF8;</span><br><span class="line">USE cloudDB01;</span><br><span class="line">CREATE TABLE dept</span><br><span class="line">(</span><br><span class="line">  deptno BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,</span><br><span class="line">  dname VARCHAR(60),</span><br><span class="line">  db_source   VARCHAR(60)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">INSERT INTO dept(dname,db_source) VALUES(&#x27;开发部&#x27;,DATABASE());</span><br><span class="line">INSERT INTO dept(dname,db_source) VALUES(&#x27;人事部&#x27;,DATABASE());</span><br><span class="line">INSERT INTO dept(dname,db_source) VALUES(&#x27;财务部&#x27;,DATABASE());</span><br><span class="line">INSERT INTO dept(dname,db_source) VALUES(&#x27;市场部&#x27;,DATABASE());</span><br><span class="line">INSERT INTO dept(dname,db_source) VALUES(&#x27;运维部&#x27;,DATABASE());</span><br><span class="line"> </span><br><span class="line">SELECT * FROM dept;</span><br></pre></td></tr></table></figure><br>6）DeptDao部门接口<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud.dao;</span><br><span class="line"></span><br><span class="line">import java.util.List;</span><br><span class="line">import org.apache.ibatis.annotations.Mapper;</span><br><span class="line">import com.atguigu.springcloud.entities.Dept;</span><br><span class="line"></span><br><span class="line">@Mapper</span><br><span class="line">public interface DeptDao</span><br><span class="line">&#123;</span><br><span class="line">  public boolean addDept(Dept dept);</span><br><span class="line"></span><br><span class="line">  public Dept findById(Long id);</span><br><span class="line"></span><br><span class="line">  public List&lt;Dept&gt; findAll();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>7）工程src/main/resources/mybatis目录下新建mapper文件夹后再建DeptMapper.xml<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span><br><span class="line">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;</span><br><span class="line"> </span><br><span class="line">&lt;mapper namespace=&quot;com.atguigu.springcloud.dao.DeptDao&quot;&gt;</span><br><span class="line"> </span><br><span class="line">  &lt;select id=&quot;findById&quot; resultType=&quot;Dept&quot; parameterType=&quot;Long&quot;&gt;</span><br><span class="line">   select deptno,dname,db_source from dept where deptno=#&#123;deptno&#125;; </span><br><span class="line">  &lt;/select&gt;</span><br><span class="line">  &lt;select id=&quot;findAll&quot; resultType=&quot;Dept&quot;&gt;</span><br><span class="line">   select deptno,dname,db_source from dept; </span><br><span class="line">  &lt;/select&gt;</span><br><span class="line">  &lt;insert id=&quot;addDept&quot; parameterType=&quot;Dept&quot;&gt;</span><br><span class="line">   INSERT INTO dept(dname,db_source) VALUES(#&#123;dname&#125;,DATABASE());</span><br><span class="line">  &lt;/insert&gt;</span><br><span class="line">  </span><br><span class="line">&lt;/mapper&gt;</span><br></pre></td></tr></table></figure><br>8）DeptService部门服务接口<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud.service;</span><br><span class="line"></span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">import com.atguigu.springcloud.entities.Dept;</span><br><span class="line"></span><br><span class="line">public interface DeptService</span><br><span class="line">&#123;</span><br><span class="line">  public boolean add(Dept dept);</span><br><span class="line">  public Dept    get(Long id);</span><br><span class="line">  public List&lt;Dept&gt; list();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>9）DeptController部门微服务提供者REST<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud.controller;</span><br><span class="line"></span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">import org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line">import org.springframework.web.bind.annotation.PathVariable;</span><br><span class="line">import org.springframework.web.bind.annotation.RequestBody;</span><br><span class="line">import org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line">import org.springframework.web.bind.annotation.RequestMethod;</span><br><span class="line">import org.springframework.web.bind.annotation.RestController;</span><br><span class="line">import com.atguigu.springcloud.entities.Dept;</span><br><span class="line">import com.atguigu.springcloud.service.DeptService;</span><br><span class="line"></span><br><span class="line">@RestController</span><br><span class="line">public class DeptController</span><br><span class="line">&#123;</span><br><span class="line">  @Autowired</span><br><span class="line">  private DeptService service;</span><br><span class="line">  </span><br><span class="line">  @RequestMapping(value=&quot;/dept/add&quot;,method=RequestMethod.POST)</span><br><span class="line">  public boolean add(@RequestBody Dept dept)</span><br><span class="line">  &#123;</span><br><span class="line">   return service.add(dept);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  @RequestMapping(value=&quot;/dept/get/&#123;id&#125;&quot;,method=RequestMethod.GET)</span><br><span class="line">  public Dept get(@PathVariable(&quot;id&quot;) Long id)</span><br><span class="line">  &#123;</span><br><span class="line">   return service.get(id);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  @RequestMapping(value=&quot;/dept/list&quot;,method=RequestMethod.GET)</span><br><span class="line">  public List&lt;Dept&gt; list()</span><br><span class="line">  &#123;</span><br><span class="line">   return service.list();</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>10）DeptProvider8001_App主启动类DeptProvider8001_App<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud;</span><br><span class="line"></span><br><span class="line">import org.springframework.boot.SpringApplication;</span><br><span class="line">import org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"></span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class DeptProvider8001_App</span><br><span class="line">&#123;</span><br><span class="line">  public static void main(String[] args)</span><br><span class="line">  &#123;</span><br><span class="line">   SpringApplication.run(DeptProvider8001_App.class, args);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>11）测试<br>浏览器输入：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost:8001/dept/get/2">http://localhost:8001/dept/get/2</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost:8001/dept/list">http://localhost:8001/dept/list</a></li>
+</ul>
+<h2 id="4-microservicecloud-consumer-dept-80部门微服务消费者Module"><a href="#4-microservicecloud-consumer-dept-80部门微服务消费者Module" class="headerlink" title="4.microservicecloud-consumer-dept-80部门微服务消费者Module"></a>4.microservicecloud-consumer-dept-80部门微服务消费者Module</h2><p>1）新建microservicecloud-consumer-dept-80<br>2）修改POM<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line"></span><br><span class="line">  &lt;parent&gt;</span><br><span class="line">   &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;microservicecloud&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">  &lt;/parent&gt;</span><br><span class="line"></span><br><span class="line">  &lt;artifactId&gt;microservicecloud-consumer-dept-80&lt;/artifactId&gt;</span><br><span class="line">  &lt;description&gt;部门微服务消费者&lt;/description&gt;</span><br><span class="line"></span><br><span class="line">  &lt;dependencies&gt;</span><br><span class="line">   &lt;dependency&gt;&lt;!-- 自己定义的api --&gt;</span><br><span class="line">     &lt;groupId&gt;com.atguigu.springcloud&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;microservicecloud-api&lt;/artifactId&gt;</span><br><span class="line">     &lt;version&gt;$&#123;project.version&#125;&lt;/version&gt;</span><br><span class="line">   &lt;/dependency&gt; </span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;!-- 修改后立即生效，热部署 --&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;springloaded&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;</span><br><span class="line">   &lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</span><br><span class="line">   &lt;/dependency&gt;   </span><br><span class="line">  &lt;/dependencies&gt;</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure><br>3）新建YML文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 80</span><br></pre></td></tr></table></figure><br>4）com.atguigu.springcloud.cfgbeans包下ConfigBean的编写（类似spring里面的applicationContext.xml写入的注入Bean）<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud.cfgbeans;</span><br><span class="line"> </span><br><span class="line">import org.springframework.context.annotation.Bean;</span><br><span class="line">import org.springframework.context.annotation.Configuration;</span><br><span class="line">import org.springframework.web.client.RestTemplate;</span><br><span class="line"> </span><br><span class="line">@Configuration</span><br><span class="line">public class ConfigBean</span><br><span class="line">&#123;</span><br><span class="line">    @Bean</span><br><span class="line">    public RestTemplate getRestTemplate()</span><br><span class="line">    &#123;</span><br><span class="line">         return new RestTemplate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>5）com.atguigu.springcloud.controller包下新建DeptController_Consumer部门微服务消费者REST</p>
+<blockquote>
+<p><strong>RestTemplate是什么：</strong><br>RestTemplate提供了多种便捷访问远程Http服务的方法，<br>是一种简单便捷的访问restful服务模板类，是Spring提供的用于访问Rest服务的客户端模板工具集<br><strong>官网地址</strong><br><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/4.3.7.RELEASE/javadoc-api/org/springframework/web/client/RestTemplate.html">https://docs.spring.io/spring-framework/docs/4.3.7.RELEASE/javadoc-api/org/springframework/web/client/RestTemplate.html</a><br><strong>使用</strong><br>使用restTemplate访问restful接口非常的简单粗暴无脑。<br>(url, requestMap, ResponseBean.class)这三个参数分别代表<br>REST请求地址、请求参数、HTTP响应转换被转换成的对象类型。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud.controller;</span><br><span class="line"> </span><br><span class="line">import java.util.List;</span><br><span class="line"> </span><br><span class="line">import org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line">import org.springframework.web.bind.annotation.PathVariable;</span><br><span class="line">import org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line">import org.springframework.web.bind.annotation.RestController;</span><br><span class="line">import org.springframework.web.client.RestTemplate;</span><br><span class="line"> </span><br><span class="line">import com.atguigu.springcloud.entities.Dept;</span><br><span class="line"> </span><br><span class="line">@RestController</span><br><span class="line">public class DeptController_Consumer</span><br><span class="line">&#123;</span><br><span class="line">    private static final String REST_URL_PREFIX = &quot;http://localhost:8001&quot;;</span><br><span class="line">    </span><br><span class="line">    @Autowired</span><br><span class="line">    private RestTemplate restTemplate;</span><br><span class="line">    </span><br><span class="line">    @RequestMapping(value=&quot;/consumer/dept/add&quot;)</span><br><span class="line">    public boolean add(Dept dept)</span><br><span class="line">    &#123;</span><br><span class="line">         return restTemplate.postForObject(REST_URL_PREFIX+&quot;/dept/add&quot;, dept, Boolean.class);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @RequestMapping(value=&quot;/consumer/dept/get/&#123;id&#125;&quot;)</span><br><span class="line">    public Dept get(@PathVariable(&quot;id&quot;) Long id)</span><br><span class="line">    &#123;</span><br><span class="line">         return restTemplate.getForObject(REST_URL_PREFIX+&quot;/dept/get/&quot;+id, Dept.class);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    @RequestMapping(value=&quot;/consumer/dept/list&quot;)</span><br><span class="line">    public List&lt;Dept&gt; list()</span><br><span class="line">    &#123;</span><br><span class="line">         return restTemplate.getForObject(REST_URL_PREFIX+&quot;/dept/list&quot;, List.class);</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>6）DeptConsumer80_App主启动类<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">package com.atguigu.springcloud;</span><br><span class="line"> </span><br><span class="line">import org.springframework.boot.SpringApplication;</span><br><span class="line">import org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"></span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class DeptConsumer80_App</span><br><span class="line">&#123;</span><br><span class="line">  public static void main(String[] args)</span><br><span class="line">  &#123;</span><br><span class="line">   SpringApplication.run(DeptConsumer80_App.class, args);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>7）测试</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost/consumer/dept/get/2">http://localhost/consumer/dept/get/2</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost/consumer/dept/list">http://localhost/consumer/dept/list</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost/consumer/dept/add?dname=AI">http://localhost/consumer/dept/add?dname=AI</a></li>
+</ul>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/08/SpringCloud/SpringCloud01%EF%BC%9A%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%A6%82%E8%BF%B0%E4%B8%8ESpringCloud/" rel="prev" title="SpringCloud01：微服务概述与SpringCloud">
+      <i class="fa fa-chevron-left"></i> SpringCloud01：微服务概述与SpringCloud
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/12/08/SpringCloud/SpringCloud03%EF%BC%9AEureka%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0/" rel="next" title="SpringCloud03：Eureka服务注册与发现">
+      SpringCloud03：Eureka服务注册与发现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%80%BB%E4%BD%93%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">一、总体介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Maven%E7%9A%84%E5%88%86%E5%8C%85%E5%88%86%E6%A8%A1%E5%9D%97%E6%9E%B6%E6%9E%84%E5%A4%8D%E4%B9%A0"><span class="nav-number">1.1.</span> <span class="nav-text">1.Maven的分包分模块架构复习</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%9E%84%E5%BB%BA%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">二、构建步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-microservicecloud%E6%95%B4%E4%BD%93%E7%88%B6%E5%B7%A5%E7%A8%8BProject"><span class="nav-number">2.1.</span> <span class="nav-text">1.microservicecloud整体父工程Project</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-microservicecloud-api%E5%85%AC%E5%85%B1%E5%AD%90%E6%A8%A1%E5%9D%97Module"><span class="nav-number">2.2.</span> <span class="nav-text">2.microservicecloud-api公共子模块Module</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-microservicecloud-provider-dept-8001-%E9%83%A8%E9%97%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85Module"><span class="nav-number">2.3.</span> <span class="nav-text">3.microservicecloud-provider-dept-8001  部门微服务提供者Module</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-microservicecloud-consumer-dept-80%E9%83%A8%E9%97%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B6%88%E8%B4%B9%E8%80%85Module"><span class="nav-number">2.4.</span> <span class="nav-text">4.microservicecloud-consumer-dept-80部门微服务消费者Module</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : '296a4bfcee61970b3d668ae2c224143d',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

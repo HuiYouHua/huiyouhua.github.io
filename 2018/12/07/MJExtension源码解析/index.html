@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前篇我们对 Runtime 的相关方法进行了总结，同时也响应了写了几个案例，这次为了巩固下知识点，这里研究并分析了下MJExtension中关于字典转模型的原理。  MJExtension解析 一、MJExtension的应用我们进MJExtension的git上可以看到，它实现功能有  MJExtension是一套字典和模型之间互相转换的超轻量级框架 JSON —&gt; Model、Core">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MJExtension源码解析">
+<meta property="og:url" content="http://example.com/2018/12/07/MJExtension%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="前篇我们对 Runtime 的相关方法进行了总结，同时也响应了写了几个案例，这次为了巩固下知识点，这里研究并分析了下MJExtension中关于字典转模型的原理。  MJExtension解析 一、MJExtension的应用我们进MJExtension的git上可以看到，它实现功能有  MJExtension是一套字典和模型之间互相转换的超轻量级框架 JSON —&gt; Model、Core">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235855764.png">
+<meta property="article:published_time" content="2018-12-06T16:01:53.000Z">
+<meta property="article:modified_time" content="2018-12-06T16:01:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235855764.png">
+
+<link rel="canonical" href="http://example.com/2018/12/07/MJExtension%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MJExtension源码解析 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/07/MJExtension%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MJExtension源码解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-07 00:01:53" itemprop="dateCreated datePublished" datetime="2018-12-07T00:01:53+08:00">2018-12-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">源码解析</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>前篇我们对 <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bf7b025f998e">Runtime</a> 的相关方法进行了总结，同时也响应了写了几个案例，这次为了巩固下知识点，这里研究并分析了下<a target="_blank" rel="noopener" href="https://github.com/CoderMJLee/MJExtension">MJExtension</a>中关于字典转模型的原理。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/MJExtension">MJExtension解析</a></p>
+<h1 id="一、MJExtension的应用"><a href="#一、MJExtension的应用" class="headerlink" title="一、MJExtension的应用"></a>一、MJExtension的应用</h1><p>我们进MJExtension的git上可以看到，它实现功能有</p>
+<ul>
+<li>MJExtension是一套字典和模型之间互相转换的超轻量级框架</li>
+<li>JSON —&gt; Model、Core Data Model</li>
+<li>JSONString —&gt; Model、Core Data Model</li>
+<li>Model、Core Data Model —&gt; JSON</li>
+<li>JSON Array —&gt; Model Array、Core Data Model Array</li>
+<li>JSONString —&gt; Model Array、Core Data Model Array</li>
+<li>Model Array、Core Data Model Array —&gt; JSON Array</li>
+<li>Coding all properties of a model with only one line of code.</li>
+<li>只需要一行代码，就能实现模型的所有属性进行Coding（归档和解档）</li>
+</ul>
+<p>初次之外，如果我们要对模型数据有些特殊处理的话我们可以调用一下方法：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *  只有这个数组中的属性名才允许进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_allowedPropertyNames;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名将会被忽略：不进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_ignoredPropertyNames;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  将属性名换为其他key去字典中取值</span><br><span class="line"> *</span><br><span class="line"> *  @return 字典中的key是属性名，value是从字典中取值用的key</span><br><span class="line"> */</span><br><span class="line">+ (NSDictionary *)mj_replacedKeyFromPropertyName;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  将属性名换为其他key去字典中取值</span><br><span class="line"> *</span><br><span class="line"> *  @return 从字典中取值用的key</span><br><span class="line"> */</span><br><span class="line">+ (id)mj_replacedKeyFromPropertyName121:(NSString *)propertyName;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  旧值换新值，用于过滤字典中的值</span><br><span class="line"> *</span><br><span class="line"> *  @param oldValue 旧值</span><br><span class="line"> *</span><br><span class="line"> *  @return 新值</span><br><span class="line"> */</span><br><span class="line">- (id)mj_newValueFromOldValue:(id)oldValue property:(MJProperty *)property;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名才会进行归档</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_allowedCodingPropertyNames;</span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名将会被忽略：不进行归档</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_ignoredCodingPropertyNames;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface NSObject (MJCoding) &lt;MJCoding&gt;</span><br><span class="line">/**</span><br><span class="line"> *  解码（从文件中解析对象）</span><br><span class="line"> */</span><br><span class="line">- (void)mj_decode:(NSCoder *)decoder;</span><br><span class="line">/**</span><br><span class="line"> *  编码（将对象写入文件中）</span><br><span class="line"> */</span><br><span class="line">- (void)mj_encode:(NSCoder *)encoder;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名才会进行字典和模型的转换</span><br><span class="line"> *</span><br><span class="line"> *  @param allowedPropertyNames          这个数组中的属性名才会进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (void)mj_setupAllowedPropertyNames:(MJAllowedPropertyNames)allowedPropertyNames;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名将会被忽略：不进行字典和模型的转换</span><br><span class="line"> *</span><br><span class="line"> *  @param ignoredPropertyNames          这个数组中的属性名将会被忽略：不进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (void)mj_setupIgnoredPropertyNames:(MJIgnoredPropertyNames)ignoredPropertyNames;</span><br></pre></td></tr></table></figure><br>这些看解释基本上都能懂，具体用法我们可以进它的主页或者下载其demo看看，用起来很方便，其中的部分方法的实现原理在下面我也会有相应的讲解。</p>
+<blockquote>
+<p>Tip：我们除了可以对这个全局的模型进行特殊处理，我们还可以对某次调用模型转换时的模型处理，就是上面代码部分的最后两个方法，当然，看他的源码的话还有更多，这里不多说了</p>
+</blockquote>
+<h1 id="二、原理解析"><a href="#二、原理解析" class="headerlink" title="二、原理解析"></a>二、原理解析</h1><h2 id="1-MJExtension的文件结构分析"><a href="#1-MJExtension的文件结构分析" class="headerlink" title="1.MJExtension的文件结构分析"></a>1.MJExtension的文件结构分析</h2><p>这个是MJExtension的文件目录</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235855764.png" alt="Snip20181207_3.png"><br>其中有几个核心类：NSObject+MJClass、NSObject+MJCoding、NSObject+MJKeyValue、NSObject+MJProperty，这几个主要就是用来模型解析和归解档的，相互直接有依赖。<br>另外NSString+MJExtension这个类中，就有方便对模型特殊处理的直接调用方法，不用自己费力去写了。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *  驼峰转下划线（loveYou -&gt; love_you）</span><br><span class="line"> */</span><br><span class="line">- (NSString *)mj_underlineFromCamel;</span><br><span class="line">/**</span><br><span class="line"> *  下划线转驼峰（love_you -&gt; loveYou）</span><br><span class="line"> */</span><br><span class="line">- (NSString *)mj_camelFromUnderline;</span><br><span class="line">/**</span><br><span class="line"> * 首字母变大写</span><br><span class="line"> */</span><br><span class="line">- (NSString *)mj_firstCharUpper;</span><br><span class="line">/**</span><br><span class="line"> * 首字母变小写</span><br><span class="line"> */</span><br><span class="line">- (NSString *)mj_firstCharLower;</span><br><span class="line"></span><br><span class="line">- (BOOL)mj_isPureInt;</span><br><span class="line"></span><br><span class="line">- (NSURL *)mj_url;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-原理分析"><a href="#2-原理分析" class="headerlink" title="2. 原理分析"></a>2. 原理分析</h2><h3 id="2-1-调用"><a href="#2-1-调用" class="headerlink" title="2.1 调用"></a>2.1 调用</h3><p>首先我们看下demo中的其中一个模型转换的调用<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">void keyValues2object()</span><br><span class="line">&#123;</span><br><span class="line">    // 1.定义一个字典</span><br><span class="line">    NSDictionary *dict = @&#123;</span><br><span class="line">                           @&quot;name&quot; : @&quot;Jack&quot;,</span><br><span class="line">                           @&quot;icon&quot; : @&quot;lufy.png&quot;,</span><br><span class="line">                           @&quot;age&quot; : @&quot;20&quot;,</span><br><span class="line">                           @&quot;height&quot; : @1.55,</span><br><span class="line">                           @&quot;money&quot; : @&quot;100.9&quot;,</span><br><span class="line">                           @&quot;sex&quot; : @(SexFemale),</span><br><span class="line">                           @&quot;gay&quot; : @&quot;1&quot;</span><br><span class="line">                       //  @&quot;gay&quot; : @&quot;NO&quot;</span><br><span class="line">                       //  @&quot;gay&quot; : @&quot;true&quot;</span><br><span class="line">                           &#125;;</span><br><span class="line">    </span><br><span class="line">    // 2.将字典转为MJUser模型</span><br><span class="line">    MJUser *user = [MJUser mj_objectWithKeyValues:dict];</span><br><span class="line">    </span><br><span class="line">    // 3.打印MJUser模型的属性</span><br><span class="line">    MJExtensionLog(@&quot;name=%@, icon=%@, age=%d, height=%@, money=%@, sex=%d, gay=%d&quot;, user.name, user.icon, user.age, user.height, user.money, user.sex, user.gay);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-分析"><a href="#2-2-分析" class="headerlink" title="2.2 分析"></a>2.2 分析</h3><h6 id="1-我们点进-mj-objectWithKeyValues-方法一直到这"><a href="#1-我们点进-mj-objectWithKeyValues-方法一直到这" class="headerlink" title="1) 我们点进 mj_objectWithKeyValues: 方法一直到这"></a>1) 我们点进 <strong>mj_objectWithKeyValues:</strong> 方法一直到这</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> 1.获得JSON对象</span><br><span class="line"> 2.判断普通的模型转换还是Coredata转换</span><br><span class="line"> */</span><br><span class="line">+ (instancetype)mj_objectWithKeyValues:(id)keyValues context:(NSManagedObjectContext *)context</span><br><span class="line">&#123;</span><br><span class="line">    // 获得JSON对象</span><br><span class="line">    keyValues = [keyValues mj_JSONObject];</span><br><span class="line">    MJExtensionAssertError([keyValues isKindOfClass:[NSDictionary class]], nil, [self class], @&quot;keyValues参数不是一个字典&quot;);</span><br><span class="line">    </span><br><span class="line">    if ([self isSubclassOfClass:[NSManagedObject class]] &amp;&amp; context) &#123;</span><br><span class="line">        NSString *entityName = [NSStringFromClass(self) componentsSeparatedByString:@&quot;.&quot;].lastObject;</span><br><span class="line">        return [[NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:context] mj_setKeyValues:keyValues context:context];</span><br><span class="line">    &#125;</span><br><span class="line">    return [[[self alloc] init] mj_setKeyValues:keyValues];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="2）点击进入到mj-setKeyValues-这个方法"><a href="#2）点击进入到mj-setKeyValues-这个方法" class="headerlink" title="2）点击进入到mj_setKeyValues:这个方法"></a>2）点击进入到<strong>mj_setKeyValues:</strong>这个方法</h6><p>进到这个方法<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line">- (instancetype)mj_setKeyValues:(id)keyValues context:(NSManagedObjectContext *)context</span><br><span class="line">&#123;</span><br><span class="line">    // 获得JSON对象</span><br><span class="line">    keyValues = [keyValues mj_JSONObject];</span><br><span class="line">    </span><br><span class="line">    MJExtensionAssertError([keyValues isKindOfClass:[NSDictionary class]], self, [self class], @&quot;keyValues参数不是一个字典&quot;);</span><br><span class="line">    </span><br><span class="line">    Class clazz = [self class];</span><br><span class="line">    // 获取名单类的数组</span><br><span class="line">    NSArray *allowedPropertyNames = [clazz mj_totalAllowedPropertyNames];</span><br><span class="line">    NSArray *ignoredPropertyNames = [clazz mj_totalIgnoredPropertyNames];</span><br><span class="line">    </span><br><span class="line">    //通过封装的方法回调一个通过运行时编写的，用于返回属性列表的方法。</span><br><span class="line">    [clazz mj_enumerateProperties:^(MJProperty *property, BOOL *stop) &#123;</span><br><span class="line">        @try &#123;</span><br><span class="line">            // 0.检测是否被忽略</span><br><span class="line">            if (allowedPropertyNames.count &amp;&amp; ![allowedPropertyNames containsObject:property.name]) return;</span><br><span class="line">            if ([ignoredPropertyNames containsObject:property.name]) return;</span><br><span class="line">            </span><br><span class="line">            // 1.取出属性值</span><br><span class="line">            id value;</span><br><span class="line">            NSArray *propertyKeyses = [property propertyKeysForClass:clazz];</span><br><span class="line">            for (NSArray *propertyKeys in propertyKeyses) &#123;</span><br><span class="line">                value = keyValues;</span><br><span class="line">                for (MJPropertyKey *propertyKey in propertyKeys) &#123;</span><br><span class="line">                    value = [propertyKey valueInObject:value];</span><br><span class="line">                &#125;</span><br><span class="line">                if (value) break;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            // 值的过滤</span><br><span class="line">            id newValue = [clazz mj_getNewValueFromObject:self oldValue:value property:property];</span><br><span class="line">            if (newValue != value) &#123; // 有过滤后的新值</span><br><span class="line">                [property setValue:newValue forObject:self];</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            // 如果没有值，就直接返回</span><br><span class="line">            if (!value || value == [NSNull null]) return;</span><br><span class="line">            </span><br><span class="line">            // 2.复杂处理</span><br><span class="line">            MJPropertyType *type = property.type;</span><br><span class="line">            Class propertyClass = type.typeClass;</span><br><span class="line">            Class objectClass = [property objectClassInArrayForClass:[self class]];</span><br><span class="line">            </span><br><span class="line">            // 不可变 -&gt; 可变处理</span><br><span class="line">            if (propertyClass == [NSMutableArray class] &amp;&amp; [value isKindOfClass:[NSArray class]]) &#123;</span><br><span class="line">                value = [NSMutableArray arrayWithArray:value];</span><br><span class="line">            &#125; else if (propertyClass == [NSMutableDictionary class] &amp;&amp; [value isKindOfClass:[NSDictionary class]]) &#123;</span><br><span class="line">                value = [NSMutableDictionary dictionaryWithDictionary:value];</span><br><span class="line">            &#125; else if (propertyClass == [NSMutableString class] &amp;&amp; [value isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">                value = [NSMutableString stringWithString:value];</span><br><span class="line">            &#125; else if (propertyClass == [NSMutableData class] &amp;&amp; [value isKindOfClass:[NSData class]]) &#123;</span><br><span class="line">                value = [NSMutableData dataWithData:value];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            if (!type.isFromFoundation &amp;&amp; propertyClass) &#123; // 模型属性</span><br><span class="line">                value = [propertyClass mj_objectWithKeyValues:value context:context];</span><br><span class="line">            &#125; else if (objectClass) &#123;</span><br><span class="line">                if (objectClass == [NSURL class] &amp;&amp; [value isKindOfClass:[NSArray class]]) &#123;</span><br><span class="line">                    // string array -&gt; url array</span><br><span class="line">                    NSMutableArray *urlArray = [NSMutableArray array];</span><br><span class="line">                    for (NSString *string in value) &#123;</span><br><span class="line">                        if (![string isKindOfClass:[NSString class]]) continue;</span><br><span class="line">                        [urlArray addObject:string.mj_url];</span><br><span class="line">                    &#125;</span><br><span class="line">                    value = urlArray;</span><br><span class="line">                &#125; else &#123; // 字典数组--&gt;模型数组</span><br><span class="line">                    value = [objectClass mj_objectArrayWithKeyValuesArray:value context:context];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                if (propertyClass == [NSString class]) &#123;</span><br><span class="line">                    if ([value isKindOfClass:[NSNumber class]]) &#123;</span><br><span class="line">                        // NSNumber -&gt; NSString</span><br><span class="line">                        value = [value description];</span><br><span class="line">                    &#125; else if ([value isKindOfClass:[NSURL class]]) &#123;</span><br><span class="line">                        // NSURL -&gt; NSString</span><br><span class="line">                        value = [value absoluteString];</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; else if ([value isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">                    if (propertyClass == [NSURL class]) &#123;</span><br><span class="line">                        // NSString -&gt; NSURL</span><br><span class="line">                        // 字符串转码</span><br><span class="line">                        value = [value mj_url];</span><br><span class="line">                    &#125; else if (type.isNumberType) &#123;</span><br><span class="line">                        NSString *oldValue = value;</span><br><span class="line">                        </span><br><span class="line">                        // NSString -&gt; NSNumber</span><br><span class="line">                        if (type.typeClass == [NSDecimalNumber class]) &#123;</span><br><span class="line">                            value = [NSDecimalNumber decimalNumberWithString:oldValue];</span><br><span class="line">                        &#125; else &#123;</span><br><span class="line">                            value = [numberFormatter_ numberFromString:oldValue];</span><br><span class="line">                        &#125;</span><br><span class="line">                        </span><br><span class="line">                        // 如果是BOOL</span><br><span class="line">                        if (type.isBoolType) &#123;</span><br><span class="line">                            // 字符串转BOOL（字符串没有charValue方法）</span><br><span class="line">                            // 系统会调用字符串的charValue转为BOOL类型</span><br><span class="line">                            NSString *lower = [oldValue lowercaseString];</span><br><span class="line">                            if ([lower isEqualToString:@&quot;yes&quot;] || [lower isEqualToString:@&quot;true&quot;]) &#123;</span><br><span class="line">                                value = @YES;</span><br><span class="line">                            &#125; else if ([lower isEqualToString:@&quot;no&quot;] || [lower isEqualToString:@&quot;false&quot;]) &#123;</span><br><span class="line">                                value = @NO;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; else if ([value isKindOfClass:[NSNumber class]] &amp;&amp; propertyClass == [NSDecimalNumber class])&#123;</span><br><span class="line">                    // 过滤 NSDecimalNumber类型</span><br><span class="line">                    if (![value isKindOfClass:[NSDecimalNumber class]]) &#123;</span><br><span class="line">                        value = [NSDecimalNumber decimalNumberWithDecimal:[((NSNumber *)value) decimalValue]];</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                // value和property类型不匹配</span><br><span class="line">                if (propertyClass &amp;&amp; ![value isKindOfClass:propertyClass]) &#123;</span><br><span class="line">                    value = nil;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            // 3.赋值</span><br><span class="line">            [property setValue:value forObject:self];</span><br><span class="line">        &#125; @catch (NSException *exception) &#123;</span><br><span class="line">            MJExtensionBuildError([self class], exception.reason);</span><br><span class="line">            MJExtensionLog(@&quot;%@&quot;, exception);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;];</span><br><span class="line">    </span><br><span class="line">    // 转换完毕</span><br><span class="line">    if ([self respondsToSelector:@selector(mj_keyValuesDidFinishConvertingToObject)]) &#123;</span><br><span class="line">        [self mj_keyValuesDidFinishConvertingToObject];</span><br><span class="line">    &#125;</span><br><span class="line">    if ([self respondsToSelector:@selector(mj_keyValuesDidFinishConvertingToObject:)]) &#123;</span><br><span class="line">        [self mj_keyValuesDidFinishConvertingToObject:keyValues];</span><br><span class="line">    &#125;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这段代码就是模型解析的核心代码，下面我们来分析一下<br>首先是这段代码的分析：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">1.将需要转换的对象转成JSON对象</span><br><span class="line">2.获取黑白名单中的数据内容: 可以转换的, 被忽略的</span><br><span class="line">3.遍历这个对象的所有属性,对其做响应处理</span><br><span class="line">   3.1 检查该属性是否允许进行字典和模型</span><br><span class="line">   3.2 检查该属性是否是忽略进行字典和模型</span><br><span class="line">   3.3 取出该属性对应的值</span><br><span class="line">   3.4 处理3.3中获取的值, 可以实现 mj_newValueFromOldValue: 方法进行处理, 比如设置其固定值, 日期格式转换等等</span><br><span class="line">   3.4 获取属性的包装属性, 类类型, 和如果该属性是数组的数组成员类型</span><br><span class="line">   3.5 处理3.3中获取的值, 如果是不可变类型,就变为可变类型</span><br><span class="line">   3.6 判断属性的数据类型并做响应处理</span><br><span class="line">       3.6.1 如果该属性不是 Foundation 对象的数据类型的话, 则递归调用上述所有步骤,直到其实 Foundation 对象类型, 主要是用来处理 模型套模型的数据结构</span><br><span class="line">       3.6.2 如果该属性是数组的数组成员类型存在则做响应处理</span><br><span class="line">           3.6.2.1 如果数组成员类型是url 或者 数组, 则组合成数组类型</span><br><span class="line">           3.6.2.2 如果数组成员类型是其他类型,则转换为模型数组,仍然是递归执行</span><br><span class="line">       3.6.3 如果是其他情况, 这时候剩下的都是些基本数据类型了, 则直接进行响应处理</span><br><span class="line">   3.7 通过以上处理获得最终的属性值, 利用 KVC 进行赋值</span><br><span class="line">4.至此,模型转换完成, 可以实现 mj_keyValuesDidFinishConvertingToObject:方法 来拿到你原始的 JSON 数据</span><br></pre></td></tr></table></figure><br>我们一步一步的分析下</p>
+<h6 id="1-将需要转换的对象转成JSON对象"><a href="#1-将需要转换的对象转成JSON对象" class="headerlink" title="1.将需要转换的对象转成JSON对象"></a>1.将需要转换的对象转成JSON对象</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 获得JSON对象</span><br><span class="line">    keyValues = [keyValues mj_JSONObject];</span><br></pre></td></tr></table></figure>
+<p>进去看下<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (id)mj_JSONObject</span><br><span class="line">&#123;</span><br><span class="line">    if ([self isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">        return [NSJSONSerialization JSONObjectWithData:[((NSString *)self) dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil];</span><br><span class="line">    &#125; else if ([self isKindOfClass:[NSData class]]) &#123;</span><br><span class="line">        return [NSJSONSerialization JSONObjectWithData:(NSData *)self options:kNilOptions error:nil];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return self.mj_keyValues;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这段就是调用系统的JSON序列化，返回我们要转换的JSON对象</p>
+<h6 id="2-获取黑白名单中的数据内容-可以转换的-被忽略的"><a href="#2-获取黑白名单中的数据内容-可以转换的-被忽略的" class="headerlink" title="2.获取黑白名单中的数据内容: 可以转换的, 被忽略的"></a>2.获取黑白名单中的数据内容: 可以转换的, 被忽略的</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Class clazz = [self class];</span><br><span class="line">   // 获取名单类的数组</span><br><span class="line">   NSArray *allowedPropertyNames = [clazz mj_totalAllowedPropertyNames];</span><br><span class="line">   NSArray *ignoredPropertyNames = [clazz mj_totalIgnoredPropertyNames];</span><br></pre></td></tr></table></figure>
+<p>我们点进这段代码的实现一直到下面这部分：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">+ (NSMutableArray *)mj_totalObjectsWithSelector:(SEL)selector key:(const char *)key</span><br><span class="line">&#123;</span><br><span class="line">    MJExtensionSemaphoreCreate</span><br><span class="line">    MJExtensionSemaphoreWait</span><br><span class="line">   </span><br><span class="line">    NSMutableArray *array = [self classDictForKey:key][NSStringFromClass(self)];</span><br><span class="line">    if (array == nil) &#123;</span><br><span class="line">        // 创建、存储</span><br><span class="line">        [self classDictForKey:key][NSStringFromClass(self)] = array = [NSMutableArray array];</span><br><span class="line">        </span><br><span class="line">        if ([self respondsToSelector:selector]) &#123;</span><br><span class="line">    #pragma clang diagnostic push</span><br><span class="line">    #pragma clang diagnostic ignored &quot;-Warc-performSelector-leaks&quot;</span><br><span class="line">            NSArray *subArray = [self performSelector:selector];</span><br><span class="line">    #pragma clang diagnostic pop</span><br><span class="line">            if (subArray) &#123;</span><br><span class="line">                [array addObjectsFromArray:subArray];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        [self mj_enumerateAllClasses:^(__unsafe_unretained Class c, BOOL *stop) &#123;</span><br><span class="line">            NSArray *subArray = objc_getAssociatedObject(c, key);</span><br><span class="line">            [array addObjectsFromArray:subArray];</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    MJExtensionSemaphoreSignal</span><br><span class="line">    </span><br><span class="line">    return array;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这段代码实际上是为了返回四种数据，还记得我们在上面写的类似下面这种方法：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *  只有这个数组中的属性名才允许进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_allowedPropertyNames;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  这个数组中的属性名将会被忽略：不进行字典和模型的转换</span><br><span class="line"> */</span><br><span class="line">+ (NSArray *)mj_ignoredPropertyNames;</span><br></pre></td></tr></table></figure><br>它就是为了返回我们实现的这些方法中的数组属性内容，下面我们来分析下：<br>首先，这个key值有四种</p>
+<blockquote>
+<p>key值有四种,分别表示:<br>1) MJAllowedPropertyNamesKey: 允许进行字典和模型的转换的属性<br>2) MJIgnoredPropertyNamesKey: 被忽略进行字典和模型的转换的属性<br>3) MJAllowedCodingPropertyNamesKey: 允许进行归档的属性<br>4) MJIgnoredCodingPropertyNamesKey: 被忽略进行归档的属性</p>
+</blockquote>
+<p>这里为了防止数据错乱，用了GCD 信号量机制，下面我们继续分析：</p>
+<ol>
+<li>首先我们看<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSMutableArray *array = [self classDictForKey:key][NSStringFromClass(self)];</span><br></pre></td></tr></table></figure>
+点击去看的话会发现他会声明四个静态变量分别存储上面四种类型的属性数组，这没什么。</li>
+<li>创建和存储那些我们需要特殊处理属性的数组<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[self classDictForKey:key][NSStringFromClass(self)] = array = [NSMutableArray array];</span><br></pre></td></tr></table></figure>
+这里我设置了两个要被忽略的字段，<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> po [self classDictForKey:key]</span><br><span class="line"> &#123;</span><br><span class="line">   MJUser =     (</span><br><span class="line">     name,</span><br><span class="line">     icon</span><br><span class="line">   );</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">&lt;__NSArrayM 0x6000001f84b0&gt;(</span><br><span class="line">   name,</span><br><span class="line">   icon</span><br><span class="line"> )</span><br></pre></td></tr></table></figure>
+我们可以看到：取出字典里以 self 为 key 所对应的值,即数组内容对应的就是上述 key 值表示的属性字典集合</li>
+<li>当数组为空时,创建一个字典放入以 self 为key 的空值</li>
+<li>将实现 selector 方法返回的数组放入到这个以 self 为key 的数组当中<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">if ([self respondsToSelector:selector]) &#123;</span><br><span class="line">    #pragma clang diagnostic push</span><br><span class="line">    #pragma clang diagnostic ignored &quot;-Warc-performSelector-leaks&quot;</span><br><span class="line">            NSArray *subArray = [self performSelector:selector];</span><br><span class="line">    #pragma clang diagnostic pop</span><br><span class="line">            if (subArray) &#123;</span><br><span class="line">                [array addObjectsFromArray:subArray];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+这个方法需要我们去实现，就是上面讲的要返回的特殊处理的字段</li>
+<li>遍历 self 类中以 key 为标识符的 数据内容取出并返回<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[self mj_enumerateAllClasses:^(__unsafe_unretained Class c, BOOL *stop) &#123;</span><br><span class="line">            NSArray *subArray = objc_getAssociatedObject(c, key);</span><br><span class="line">            [array addObjectsFromArray:subArray];</span><br><span class="line">        &#125;];</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>总结: 这个方法就是为了如果用户实现了比如 <strong>+ (NSArray <em>)mj_allowedPropertyNames+ (NSArray </em>)mj_allowedCodingPropertyNames;</strong> 这样的方法时, 返回用户在这里设置的数组属性内容</p>
+<p>回到3中</p>
+<h6 id="3-遍历这个对象的所有属性-对其做响应处理"><a href="#3-遍历这个对象的所有属性-对其做响应处理" class="headerlink" title="3.遍历这个对象的所有属性,对其做响应处理"></a>3.遍历这个对象的所有属性,对其做响应处理</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//通过封装的方法回调一个通过运行时编写的，用于返回属性列表的方法。</span><br><span class="line">    [clazz mj_enumerateProperties:^(MJProperty *property, BOOL *stop) &#123;</span><br></pre></td></tr></table></figure>
+<p>我们点进去直到<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">+ (NSMutableArray *)properties</span><br><span class="line">&#123;</span><br><span class="line">    NSMutableArray *cachedProperties = [self propertyDictForKey:&amp;MJCachedPropertiesKey][NSStringFromClass(self)];</span><br><span class="line">    </span><br><span class="line">    if (cachedProperties == nil) &#123;</span><br><span class="line">        MJExtensionSemaphoreCreate</span><br><span class="line">        MJExtensionSemaphoreWait</span><br><span class="line">        </span><br><span class="line">        if (cachedProperties == nil) &#123;</span><br><span class="line">            cachedProperties = [NSMutableArray array];</span><br><span class="line">            </span><br><span class="line">            [self mj_enumerateClasses:^(__unsafe_unretained Class c, BOOL *stop) &#123;</span><br><span class="line">                // 1.获得所有的成员变量</span><br><span class="line">                unsigned int outCount = 0;</span><br><span class="line">                objc_property_t *properties = class_copyPropertyList(c, &amp;outCount);</span><br><span class="line">                </span><br><span class="line">                // 2.遍历每一个成员变量</span><br><span class="line">                for (unsigned int i = 0; i&lt;outCount; i++) &#123;</span><br><span class="line">                    // 将每一个成员变量包装成一个对象</span><br><span class="line">                    MJProperty *property = [MJProperty cachedPropertyWithProperty:properties[i]];</span><br><span class="line">                    // 过滤掉Foundation框架类里面的属性</span><br><span class="line">                    if ([MJFoundation isClassFromFoundation:property.srcClass]) continue;</span><br><span class="line">                    property.srcClass = c;</span><br><span class="line">                    [property setOriginKey:[self propertyKey:property.name] forClass:self];</span><br><span class="line">                    [property setObjectClassInArray:[self propertyObjectClassInArray:property.name] forClass:self];</span><br><span class="line">                    [cachedProperties addObject:property];</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                // 3.释放内存</span><br><span class="line">                free(properties);</span><br><span class="line">            &#125;];</span><br><span class="line">            </span><br><span class="line">            [self propertyDictForKey:&amp;MJCachedPropertiesKey][NSStringFromClass(self)] = cachedProperties;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        MJExtensionSemaphoreSignal</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return cachedProperties;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>步骤解析：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1. 根据 MJCachedPropertiesKey 字段取缓存中的缓存属性数组</span><br><span class="line">2. 如果不存在,则创建数组,遍历该类下的所有属性</span><br><span class="line">3. 将每个属性包装成一个 MJProperty 对象,设置该对象的objc_property_t, name, type, 父类...,设置的内容可以查看runtime中</span><br><span class="line">4. 同时在 propertyKey 和 propertyObjectClassInArray 中可以设置对象要替换的属性和模型类, 可以在 mj_replacedKeyFromPropertyName121 和 mj_objectClassInArray...方法中设置</span><br><span class="line">5. 将该类的成员属性缓存起来并返回</span><br><span class="line">总结：这段代码就是返回我们对象的所有属性，同时可以对这些属性的字段做一些类似替换，格式化等操作。可以进**propertyKey：**这个方法查看</span><br></pre></td></tr></table></figure></p>
+<h6 id="3-1-检查该属性是否允许进行字典和模型"><a href="#3-1-检查该属性是否允许进行字典和模型" class="headerlink" title="3.1 检查该属性是否允许进行字典和模型"></a>3.1 检查该属性是否允许进行字典和模型</h6><h6 id="3-2-检查该属性是否是忽略进行字典和模型"><a href="#3-2-检查该属性是否是忽略进行字典和模型" class="headerlink" title="3.2 检查该属性是否是忽略进行字典和模型"></a>3.2 检查该属性是否是忽略进行字典和模型</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (allowedPropertyNames.count &amp;&amp; ![allowedPropertyNames containsObject:property.name]) return;</span><br><span class="line">if ([ignoredPropertyNames containsObject:property.name]) return;</span><br></pre></td></tr></table></figure>
+<p>如果该字段不允许转换或者被忽略转换则直接返回</p>
+<h6 id="3-3-取出该属性对应的值"><a href="#3-3-取出该属性对应的值" class="headerlink" title="3.3 取出该属性对应的值"></a>3.3 取出该属性对应的值</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">id value;</span><br><span class="line">NSArray *propertyKeyses = [property propertyKeysForClass:clazz];</span><br><span class="line">for (NSArray *propertyKeys in propertyKeyses) &#123;</span><br><span class="line">      value = keyValues;</span><br><span class="line">      for (MJPropertyKey *propertyKey in propertyKeys) &#123;</span><br><span class="line">             value = [propertyKey valueInObject:value];</span><br><span class="line">      &#125;</span><br><span class="line">      if (value) break;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="3-4-处理3-3中获取的值-可以实现-mj-newValueFromOldValue-方法进行处理-比如设置其固定值-日期格式转换等等"><a href="#3-4-处理3-3中获取的值-可以实现-mj-newValueFromOldValue-方法进行处理-比如设置其固定值-日期格式转换等等" class="headerlink" title="3.4 处理3.3中获取的值, 可以实现 mj_newValueFromOldValue: 方法进行处理, 比如设置其固定值, 日期格式转换等等"></a>3.4 处理3.3中获取的值, 可以实现 mj_newValueFromOldValue: 方法进行处理, 比如设置其固定值, 日期格式转换等等</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id newValue = [clazz mj_getNewValueFromObject:self oldValue:value property:property];</span><br><span class="line">if (newValue != value) &#123; // 有过滤后的新值</span><br><span class="line">     [property setValue:newValue forObject:self];</span><br><span class="line">     return;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="3-4-获取属性的包装属性-类类型-和如果该属性是数组的数组成员类型"><a href="#3-4-获取属性的包装属性-类类型-和如果该属性是数组的数组成员类型" class="headerlink" title="3.4 获取属性的包装属性, 类类型, 和如果该属性是数组的数组成员类型"></a>3.4 获取属性的包装属性, 类类型, 和如果该属性是数组的数组成员类型</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MJPropertyType *type = property.type;</span><br><span class="line">Class propertyClass = type.typeClass;</span><br><span class="line">Class objectClass = [property objectClassInArrayForClass:[self class]];</span><br></pre></td></tr></table></figure>
+<h6 id="3-5-处理3-3中获取的值-如果是不可变类型-就变为可变类型"><a href="#3-5-处理3-3中获取的值-如果是不可变类型-就变为可变类型" class="headerlink" title="3.5 处理3.3中获取的值, 如果是不可变类型,就变为可变类型"></a>3.5 处理3.3中获取的值, 如果是不可变类型,就变为可变类型</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">if (propertyClass == [NSMutableArray class] &amp;&amp; [value isKindOfClass:[NSArray class]]) &#123;</span><br><span class="line">    value = [NSMutableArray arrayWithArray:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableDictionary class] &amp;&amp; [value isKindOfClass:[NSDictionary class]]) &#123;</span><br><span class="line">    value = [NSMutableDictionary dictionaryWithDictionary:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableString class] &amp;&amp; [value isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">    value = [NSMutableString stringWithString:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableData class] &amp;&amp; [value isKindOfClass:[NSData class]]) &#123;</span><br><span class="line">    value = [NSMutableData dataWithData:value];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="3-6-判断属性的数据类型并做响应处理"><a href="#3-6-判断属性的数据类型并做响应处理" class="headerlink" title="3.6 判断属性的数据类型并做响应处理"></a>3.6 判断属性的数据类型并做响应处理</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">if (propertyClass == [NSMutableArray class] &amp;&amp; [value isKindOfClass:[NSArray class]]) &#123;</span><br><span class="line">    value = [NSMutableArray arrayWithArray:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableDictionary class] &amp;&amp; [value isKindOfClass:[NSDictionary class]]) &#123;</span><br><span class="line">    value = [NSMutableDictionary dictionaryWithDictionary:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableString class] &amp;&amp; [value isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">    value = [NSMutableString stringWithString:value];</span><br><span class="line">&#125; else if (propertyClass == [NSMutableData class] &amp;&amp; [value isKindOfClass:[NSData class]]) &#123;</span><br><span class="line">    value = [NSMutableData dataWithData:value];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (!type.isFromFoundation &amp;&amp; propertyClass) &#123; // 模型属性</span><br><span class="line">    value = [propertyClass mj_objectWithKeyValues:value context:context];</span><br><span class="line">&#125; else if (objectClass) &#123;</span><br><span class="line">    if (objectClass == [NSURL class] &amp;&amp; [value isKindOfClass:[NSArray class]]) &#123;</span><br><span class="line">        // string array -&gt; url array</span><br><span class="line">        NSMutableArray *urlArray = [NSMutableArray array];</span><br><span class="line">        for (NSString *string in value) &#123;</span><br><span class="line">            if (![string isKindOfClass:[NSString class]]) continue;</span><br><span class="line">            [urlArray addObject:string.mj_url];</span><br><span class="line">        &#125;</span><br><span class="line">        value = urlArray;</span><br><span class="line">    &#125; else &#123; // 字典数组--&gt;模型数组</span><br><span class="line">        value = [objectClass mj_objectArrayWithKeyValuesArray:value context:context];</span><br><span class="line">    &#125;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    if (propertyClass == [NSString class]) &#123;</span><br><span class="line">        if ([value isKindOfClass:[NSNumber class]]) &#123;</span><br><span class="line">            // NSNumber -&gt; NSString</span><br><span class="line">            value = [value description];</span><br><span class="line">        &#125; else if ([value isKindOfClass:[NSURL class]]) &#123;</span><br><span class="line">            // NSURL -&gt; NSString</span><br><span class="line">            value = [value absoluteString];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else if ([value isKindOfClass:[NSString class]]) &#123;</span><br><span class="line">        if (propertyClass == [NSURL class]) &#123;</span><br><span class="line">            // NSString -&gt; NSURL</span><br><span class="line">            // 字符串转码</span><br><span class="line">            value = [value mj_url];</span><br><span class="line">        &#125; else if (type.isNumberType) &#123;</span><br><span class="line">            NSString *oldValue = value;</span><br><span class="line">            </span><br><span class="line">            // NSString -&gt; NSNumber</span><br><span class="line">            if (type.typeClass == [NSDecimalNumber class]) &#123;</span><br><span class="line">                value = [NSDecimalNumber decimalNumberWithString:oldValue];</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                value = [numberFormatter_ numberFromString:oldValue];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            // 如果是BOOL</span><br><span class="line">            if (type.isBoolType) &#123;</span><br><span class="line">                // 字符串转BOOL（字符串没有charValue方法）</span><br><span class="line">                // 系统会调用字符串的charValue转为BOOL类型</span><br><span class="line">                NSString *lower = [oldValue lowercaseString];</span><br><span class="line">                if ([lower isEqualToString:@&quot;yes&quot;] || [lower isEqualToString:@&quot;true&quot;]) &#123;</span><br><span class="line">                    value = @YES;</span><br><span class="line">                &#125; else if ([lower isEqualToString:@&quot;no&quot;] || [lower isEqualToString:@&quot;false&quot;]) &#123;</span><br><span class="line">                    value = @NO;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else if ([value isKindOfClass:[NSNumber class]] &amp;&amp; propertyClass == [NSDecimalNumber class])&#123;</span><br><span class="line">        // 过滤 NSDecimalNumber类型</span><br><span class="line">        if (![value isKindOfClass:[NSDecimalNumber class]]) &#123;</span><br><span class="line">            value = [NSDecimalNumber decimalNumberWithDecimal:[((NSNumber *)value) decimalValue]];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // value和property类型不匹配</span><br><span class="line">    if (propertyClass &amp;&amp; ![value isKindOfClass:propertyClass]) &#123;</span><br><span class="line">        value = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>3.6.1 如果该属性不是 Foundation 对象的数据类型的话, 则递归调用上述所有步骤,直到其实 Foundation 对象类型, 主要是用来处理 模型套模型的数据结构</li>
+<li>3.6.2 如果该属性是数组的数组成员类型存在则做响应处理<ul>
+<li>3.6.2.1 如果数组成员类型是url 或者 数组, 则组合成数组类型</li>
+<li>3.6.2.2 如果数组成员类型是其他类型,则转换为模型数组,仍然是递归执行</li>
+</ul>
+</li>
+<li>3.6.3 如果是其他情况, 这时候剩下的都是些基本数据类型了, 则直接进行响应处理<h6 id="3-7-通过以上处理获得最终的属性值-利用-KVC-进行赋值"><a href="#3-7-通过以上处理获得最终的属性值-利用-KVC-进行赋值" class="headerlink" title="3.7 通过以上处理获得最终的属性值, 利用 KVC 进行赋值"></a>3.7 通过以上处理获得最终的属性值, 利用 KVC 进行赋值</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[property setValue:value forObject:self];</span><br></pre></td></tr></table></figure>
+<h6 id="4-至此-模型转换完成-可以实现-mj-keyValuesDidFinishConvertingToObject-方法-来拿到你原始的-JSON-数据"><a href="#4-至此-模型转换完成-可以实现-mj-keyValuesDidFinishConvertingToObject-方法-来拿到你原始的-JSON-数据" class="headerlink" title="4.至此,模型转换完成, 可以实现 mj_keyValuesDidFinishConvertingToObject:方法 来拿到你原始的 JSON 数据"></a>4.至此,模型转换完成, 可以实现 mj_keyValuesDidFinishConvertingToObject:方法 来拿到你原始的 JSON 数据</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> if ([self respondsToSelector:@selector(mj_keyValuesDidFinishConvertingToObject)]) &#123;</span><br><span class="line">     [self mj_keyValuesDidFinishConvertingToObject];</span><br><span class="line">&#125;</span><br><span class="line">if ([self respondsToSelector:@selector(mj_keyValuesDidFinishConvertingToObject:)]) &#123;</span><br><span class="line">    [self mj_keyValuesDidFinishConvertingToObject:keyValues];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<blockquote>
+<p>总结：MJExtension就是运用 runtime 对类添加属性和获取属性，获取类的成员变量以及对成员变量的操作以及递归思想等实现模型转换的。<br>如果对 runtime 调用方法不熟悉的童鞋，可以看下前篇文章<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bf7b025f998e">Runtime方法总结及部分案例</a><br>喜欢的就点个赞👍吧</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS/" rel="tag"># iOS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/05/Runtime%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93%E5%8F%8A%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B/" rel="prev" title="Runtime方法总结及部分案例">
+      <i class="fa fa-chevron-left"></i> Runtime方法总结及部分案例
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/12/08/SpringCloud/SpringCloud01%EF%BC%9A%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%A6%82%E8%BF%B0%E4%B8%8ESpringCloud/" rel="next" title="SpringCloud01：微服务概述与SpringCloud">
+      SpringCloud01：微服务概述与SpringCloud <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81MJExtension%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">一、MJExtension的应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">二、原理解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-MJExtension%E7%9A%84%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">1.MJExtension的文件结构分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">2. 原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E8%B0%83%E7%94%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.1 调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%88%86%E6%9E%90"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2 分析</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1-%E6%88%91%E4%BB%AC%E7%82%B9%E8%BF%9B-mj-objectWithKeyValues-%E6%96%B9%E6%B3%95%E4%B8%80%E7%9B%B4%E5%88%B0%E8%BF%99"><span class="nav-number">2.2.2.0.0.1.</span> <span class="nav-text">1) 我们点进 mj_objectWithKeyValues: 方法一直到这</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2%EF%BC%89%E7%82%B9%E5%87%BB%E8%BF%9B%E5%85%A5%E5%88%B0mj-setKeyValues-%E8%BF%99%E4%B8%AA%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.2.0.0.2.</span> <span class="nav-text">2）点击进入到mj_setKeyValues:这个方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#1-%E5%B0%86%E9%9C%80%E8%A6%81%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%AF%B9%E8%B1%A1%E8%BD%AC%E6%88%90JSON%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.2.2.0.0.3.</span> <span class="nav-text">1.将需要转换的对象转成JSON对象</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-%E8%8E%B7%E5%8F%96%E9%BB%91%E7%99%BD%E5%90%8D%E5%8D%95%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%86%85%E5%AE%B9-%E5%8F%AF%E4%BB%A5%E8%BD%AC%E6%8D%A2%E7%9A%84-%E8%A2%AB%E5%BF%BD%E7%95%A5%E7%9A%84"><span class="nav-number">2.2.2.0.0.4.</span> <span class="nav-text">2.获取黑白名单中的数据内容: 可以转换的, 被忽略的</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-%E9%81%8D%E5%8E%86%E8%BF%99%E4%B8%AA%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%89%80%E6%9C%89%E5%B1%9E%E6%80%A7-%E5%AF%B9%E5%85%B6%E5%81%9A%E5%93%8D%E5%BA%94%E5%A4%84%E7%90%86"><span class="nav-number">2.2.2.0.0.5.</span> <span class="nav-text">3.遍历这个对象的所有属性,对其做响应处理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-%E6%A3%80%E6%9F%A5%E8%AF%A5%E5%B1%9E%E6%80%A7%E6%98%AF%E5%90%A6%E5%85%81%E8%AE%B8%E8%BF%9B%E8%A1%8C%E5%AD%97%E5%85%B8%E5%92%8C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.2.0.0.6.</span> <span class="nav-text">3.1 检查该属性是否允许进行字典和模型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-2-%E6%A3%80%E6%9F%A5%E8%AF%A5%E5%B1%9E%E6%80%A7%E6%98%AF%E5%90%A6%E6%98%AF%E5%BF%BD%E7%95%A5%E8%BF%9B%E8%A1%8C%E5%AD%97%E5%85%B8%E5%92%8C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.2.0.0.7.</span> <span class="nav-text">3.2 检查该属性是否是忽略进行字典和模型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-3-%E5%8F%96%E5%87%BA%E8%AF%A5%E5%B1%9E%E6%80%A7%E5%AF%B9%E5%BA%94%E7%9A%84%E5%80%BC"><span class="nav-number">2.2.2.0.0.8.</span> <span class="nav-text">3.3 取出该属性对应的值</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-4-%E5%A4%84%E7%90%863-3%E4%B8%AD%E8%8E%B7%E5%8F%96%E7%9A%84%E5%80%BC-%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0-mj-newValueFromOldValue-%E6%96%B9%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%A4%84%E7%90%86-%E6%AF%94%E5%A6%82%E8%AE%BE%E7%BD%AE%E5%85%B6%E5%9B%BA%E5%AE%9A%E5%80%BC-%E6%97%A5%E6%9C%9F%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%AD%89%E7%AD%89"><span class="nav-number">2.2.2.0.0.9.</span> <span class="nav-text">3.4 处理3.3中获取的值, 可以实现 mj_newValueFromOldValue: 方法进行处理, 比如设置其固定值, 日期格式转换等等</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-4-%E8%8E%B7%E5%8F%96%E5%B1%9E%E6%80%A7%E7%9A%84%E5%8C%85%E8%A3%85%E5%B1%9E%E6%80%A7-%E7%B1%BB%E7%B1%BB%E5%9E%8B-%E5%92%8C%E5%A6%82%E6%9E%9C%E8%AF%A5%E5%B1%9E%E6%80%A7%E6%98%AF%E6%95%B0%E7%BB%84%E7%9A%84%E6%95%B0%E7%BB%84%E6%88%90%E5%91%98%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.2.0.0.10.</span> <span class="nav-text">3.4 获取属性的包装属性, 类类型, 和如果该属性是数组的数组成员类型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-5-%E5%A4%84%E7%90%863-3%E4%B8%AD%E8%8E%B7%E5%8F%96%E7%9A%84%E5%80%BC-%E5%A6%82%E6%9E%9C%E6%98%AF%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB%E5%9E%8B-%E5%B0%B1%E5%8F%98%E4%B8%BA%E5%8F%AF%E5%8F%98%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.2.0.0.11.</span> <span class="nav-text">3.5 处理3.3中获取的值, 如果是不可变类型,就变为可变类型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-6-%E5%88%A4%E6%96%AD%E5%B1%9E%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%B9%B6%E5%81%9A%E5%93%8D%E5%BA%94%E5%A4%84%E7%90%86"><span class="nav-number">2.2.2.0.0.12.</span> <span class="nav-text">3.6 判断属性的数据类型并做响应处理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-7-%E9%80%9A%E8%BF%87%E4%BB%A5%E4%B8%8A%E5%A4%84%E7%90%86%E8%8E%B7%E5%BE%97%E6%9C%80%E7%BB%88%E7%9A%84%E5%B1%9E%E6%80%A7%E5%80%BC-%E5%88%A9%E7%94%A8-KVC-%E8%BF%9B%E8%A1%8C%E8%B5%8B%E5%80%BC"><span class="nav-number">2.2.2.0.0.13.</span> <span class="nav-text">3.7 通过以上处理获得最终的属性值, 利用 KVC 进行赋值</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#4-%E8%87%B3%E6%AD%A4-%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%AE%8C%E6%88%90-%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0-mj-keyValuesDidFinishConvertingToObject-%E6%96%B9%E6%B3%95-%E6%9D%A5%E6%8B%BF%E5%88%B0%E4%BD%A0%E5%8E%9F%E5%A7%8B%E7%9A%84-JSON-%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.2.0.0.14.</span> <span class="nav-text">4.至此,模型转换完成, 可以实现 mj_keyValuesDidFinishConvertingToObject:方法 来拿到你原始的 JSON 数据</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : '994a9973c2f6a606c55bbab0ff699ef1',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

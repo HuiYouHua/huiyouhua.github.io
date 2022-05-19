@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、Instruments介绍 Instruments 一个很灵活的、强大的工具，是性能分析、动态跟踪 和分析OS X以及iOS代码的测试工具，用它可以极为方便收集关于一个或多个系统进程的性能和行为的数据，并能及时随着时间跟踪而产生的数据，并检查所收集的数据，还可以广泛收集不同类型的数据.也可以追踪程序运行的过程，这样instrument就可以帮助我们了解用户的应用程序和操作系统的行为。  总结一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Instruments使用总结">
+<meta property="og:url" content="http://example.com/2018/12/11/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Instruments%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="一、Instruments介绍 Instruments 一个很灵活的、强大的工具，是性能分析、动态跟踪 和分析OS X以及iOS代码的测试工具，用它可以极为方便收集关于一个或多个系统进程的性能和行为的数据，并能及时随着时间跟踪而产生的数据，并检查所收集的数据，还可以广泛收集不同类型的数据.也可以追踪程序运行的过程，这样instrument就可以帮助我们了解用户的应用程序和操作系统的行为。  总结一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015730.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015838.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015879.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015993.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016082.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240.jpeg">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016183.jpeg">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016323.jpeg">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016399.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016451.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016490.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016530.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016587.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017075.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017300.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017389.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017718.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001018569.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001018918.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001019615.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001019870.png">
+<meta property="article:published_time" content="2018-12-10T16:02:53.000Z">
+<meta property="article:modified_time" content="2018-12-10T16:02:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015730.png">
+
+<link rel="canonical" href="http://example.com/2018/12/11/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Instruments%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Instruments使用总结 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/11/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Instruments%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Instruments使用总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-11 00:02:53" itemprop="dateCreated datePublished" datetime="2018-12-11T00:02:53+08:00">2018-12-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、Instruments介绍"><a href="#一、Instruments介绍" class="headerlink" title="一、Instruments介绍"></a>一、Instruments介绍</h1><p> Instruments 一个很灵活的、强大的工具，是性能分析、动态跟踪 和分析OS X以及iOS代码的测试工具，用它可以极为方便收集关于一个或多个系统进程的性能和行为的数据，并能及时随着时间跟踪而产生的数据，并检查所收集的数据，还可以广泛收集不同类型的数据.也可以追踪程序运行的过程，这样instrument就可以帮助我们了解用户的应用程序和操作系统的行为。</p>
+<pre><code> 总结一下instrument能做的事情：
+ 1. Instruments是用于动态调追踪和分析OS X和iOS的代码的性能分析和测试工具；
+ 2.Instruments支持多线程的调试；
+ 3.可以用Instruments去录制和回放，图形用户界面的操作过程
+ 4.可将录制的图形界面操作和Instruments保存为模板，供以后访问使用。
+
+ instrument还可以：
+ 1.追踪代码中的（甚至是那些难以复制的）问题；
+ 2.分析程序的性能；
+ 3.实现程序的自动化测试；
+ 4.部分实现程序的压力测试；
+ 5.执行系统级别的通用问题追踪调试；
+ 6.使你对程序的内部运行过程更加了解。
+</code></pre><p>打开方式：<br><code>Xcode -&gt; Open Developer Tool  -&gt; Instruments</code></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015730.png" alt="1.png"></p>
+<p>其中比较常用的有四种：</p>
+<ul>
+<li>Allocations：用来检查内存分配，跟踪过程的匿名虚拟内存和堆的对象提供类名和可选保留/释放历史</li>
+<li>Leaks：一般的查看内存使用情况，检查泄漏的内存，并提供了所有活动的分配和泄漏模块的类对象分配统计信息以及内存地址历史记录</li>
+<li>Time Profiler：分析代码的执行时间，执行对系统的CPU上运行的进程低负载时间为基础采样</li>
+<li>Zombies：检查是否访问了僵尸对象</li>
+</ul>
+<p>其他的：</p>
+<ul>
+<li>Blank：创建一个空的模板，可以从Library库中添加其他模板</li>
+<li>Activity Monitor：显示器处理的CPU、内存和网络使用情况统计</li>
+<li>Automation：用JavaScript语言编写，主要用于分析应用的性能和用户行为，模仿/击发被请求的事件，利用它可以完成对被测应用的简单的UI测试及相关功能测试</li>
+<li>Cocoa Layout：观察约束变化，找出布局代码的问题所在。</li>
+<li>Core Animation：用来检测Core Animation性能的，给我们提供了周期性的FPS，并且考虑到了发生在程序之外的动画，界面滑动FPS可以进行测试</li>
+<li>Core Data：监测读取、缓存未命中、保存等操作，能直观显示是否保存次数远超实际需要</li>
+<li>Energy Diagnostic ：用于Xcode下的Instruments来分析手机电量消耗的。（必须是真机才有电量）</li>
+<li>GPU Driver ：可以测量GPU的利用率，同样也是一个很好的来判断和GPU相关动画性能的指示器。它同样也提供了类似Core Animtaion那样显示FPS的工具。</li>
+<li>Network：分析应用程序如何使用TCP / IP和UDP / IP连接使用连接仪器。就是检查手机网速的。（这个最好是真机）</li>
+</ul>
+<h1 id="二、Allocations（分配）"><a href="#二、Allocations（分配）" class="headerlink" title="二、Allocations（分配）"></a>二、Allocations（分配）</h1><h2 id="1-内存分类："><a href="#1-内存分类：" class="headerlink" title="1.内存分类："></a>1.内存分类：</h2><ul>
+<li>Leaked memory：泄漏的内存，如为对象A申请了内存空间，之后再也没用到A，也没有释放A导致内存泄漏（野指针。。。）</li>
+<li>Abandoned memory：被遗弃的内存，如循环引用，递归不断申请内存而导致的内存泄漏</li>
+<li>Cached memory：缓存的内存</li>
+</ul>
+<h2 id="2-Abandoned-memory"><a href="#2-Abandoned-memory" class="headerlink" title="2.Abandoned memory"></a>2.Abandoned memory</h2><p>其中内存泄漏我们可以用<code>Leaks</code>，野指针可以用<code>Zombies</code>（僵尸对象），而在这里我们就可以用<code>Allocations</code>来检测<code>Abandoned memory</code>的内存。</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015838.png" alt="2.png"></p>
+<p>即我们采用Generational Analysis的方法来分析，反复进入退出某一场景，查看内存的分配与释放情况，以定位哪些对象是属于Abandoned Memory的范畴。<br>在Allocations工具中，有专门的Generational Analysis设置，如下：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015879.png" alt="3.png"></p>
+<p>我们可以在程序运行时，在进入某个模块前标记一个Generation，这样会生成一个快照。然后进入、退出，再标记一个Generation，如下图：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001015993.png" alt="4.png"></p>
+<p>在详情面板中我们可以看到两个Generation间内存的增长情况，其中就可能存在潜在的被遗弃的对象，如下图：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016082.png" alt="5.png"></p>
+<p>其中growth就是我们增长的内存，GenerationA是程序启动到进入该场景增长的内存，GenerationB就是第二次进入该场景所增长的内存，查看子类可以发现有两个管理类造成了<code>Abandoned memory</code>。</p>
+<h2 id="3-设置Generations"><a href="#3-设置Generations" class="headerlink" title="3.设置Generations"></a>3.设置Generations</h2><p>使用instrument测试内存泄露 工具 Allocations 测试是否内存泄露 使用标记，可以更省事省力的测试页面是否有内存泄露<br>1）设置Generations</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240.jpeg" alt="6.jpg"></p>
+<p>2）选择mark generation</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016183.jpeg" alt="7.jpg"></p>
+<p>3）使用方法 在进入测试页面之前，mark一下——-&gt;进入页面——-&gt;退出——-&gt;mark———&gt;进入———-&gt;退出———-&gt;mark———&gt;进入如此往复5、6次，就可以看到如下结果</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016323.jpeg" alt="8.jpg"></p>
+<p><strong>这种情况下是内存有泄露，看到每次的增量都是好几百K或者上M的，都是属于内存有泄露的，这时候就需要检测下代码一般情况下，<code>100K以下都属于正常范围，growth表示距离你上次mark的增量</code></strong></p>
+<h1 id="三、Leaks（泄漏）"><a href="#三、Leaks（泄漏）" class="headerlink" title="三、Leaks（泄漏）"></a>三、Leaks（泄漏）</h1><h2 id="1-内存溢出和内存泄漏的区别"><a href="#1-内存溢出和内存泄漏的区别" class="headerlink" title="1.内存溢出和内存泄漏的区别"></a>1.内存溢出和内存泄漏的区别</h2><p><strong>内存溢出 out of memory</strong>，是指程序在申请内存时，没有足够的内存空间供其使用，出现out of memory；比如申请了一个integer,但给它存了long才能存下的数，那就是内存溢出。</p>
+<p><strong>内存泄露 memory leak</strong>，是指程序在申请内存后，无法释放已申请的内存空间，一次内存泄露危害可以忽略，但内存泄露堆积后果很严重，无论多少内存,迟早会被占光。<br><strong>memory leak会最终会导致out of memory！</strong></p>
+<p>在前面的ALLcations里面我们提到过<strong>内存泄漏就是应该释放而没有释放的内存</strong>。而内存泄漏分为两种：<strong>Leaked Memory</strong> 和 <strong>Abandoned Memory</strong>。前面我们讲到了如何找到Abandoned Memory被遗忘的内存，现在我们研究的就是<strong>Leaked Memory</strong>。</p>
+<p>以<strong>发生的方式</strong>来分类，内存泄漏可以分为4类：</p>
+<blockquote>
+<p><strong>常发性内存泄漏</strong>。发生内存泄漏的代码会被多次执行到，每次被执行的时候都会导致一块内存泄漏。<br><strong>偶发性内存泄漏</strong>。发生内存泄漏的代码只有在某些特定环境或操作过程下才会发生。常发性和偶发性是相对的。对于特定的环境，偶发性的也许就变成了常发性的。所以测试环境和测试方法对检测内存泄漏至关重要。<br><strong>一次性内存泄漏</strong>。发生内存泄漏的代码只会被执行一次，或者由于算法上的缺陷，导致总会有一块仅且一块内存发生泄漏。比如，在类的构造函数中分配内存，在析构函数中却没有释放该内存，所以内存泄漏只会发生一次。<br><strong>隐式内存泄漏</strong>。程序在运行过程中不停的分配内存，但是直到结束的时候才释放内存。严格的说这里并没有发生内存泄漏，因为最终程序释放了所有申请的内存。但是对于一个服务器程序，需要运行几天，几周甚至几个月，不及时释放内存也可能导致最终耗尽系统的所有内存。所以，我们称这类内存泄漏为隐式内存泄漏。</p>
+</blockquote>
+<p>影响：从用户使用程序的角度来看，内存泄漏本身不会产生什么危害，作为一般的用户，根本感觉不到内存泄漏的存在。<strong>真正有危害的是内存泄漏的堆积</strong>，这会最终消耗尽系统所有的内存。从这个角度来说，一次性内存泄漏并没有什么危害，因为它不会堆积，而隐式内存泄漏危害性则非常大，因为较之于常发性和偶发性内存泄漏它更难被检测到。</p>
+<p>下边我们介绍Instruments里面的Leaked的用法，首先打开Leaked，跑起工程来，点击要测试的页面，如果有内存泄漏，会出现下图中的红色的❌。然后按照后边的步骤进行修复即可</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016399.png" alt="1.png"></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016451.png" alt="2.png"></p>
+<p>上面的旧版的样式，下面的是新版的样式，基本操作差不多</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016490.png" alt="Snip20181211_2.png"></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016530.png" alt="3.png"><br>在详情面板选中显示的若干条中的一条，双击，会自动跳到内存泄露代码处，然后点击右上角 Xcode 图标进行修改。</p>
+<p>下图是对Leaked页面进一步的理解：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001016587.png" alt="4.png"></p>
+<p><strong>内存泄漏动态分析技巧：</strong></p>
+<ol>
+<li>在 Display Settings 界面建议把 Snapshot Interval （snapʃɒt, 数据快照）间隔时间设置为10秒，勾选Automatic Snapshotting，Leaks 会自动进行内存捕捉分析。（新版本直接在底部修改）</li>
+<li>熟练使用 Leaks 后会对内存泄漏判断更准确，在可能导致泄漏的操作里，在你怀疑有内存泄漏的操作前和操作后，可以点击 Snapshot Now 进行手动捕捉。</li>
+<li>开始时如果设备性能较好，可以把自动捕捉间隔设置为 5 秒钟。</li>
+<li>使用ARC的项目，一般内存泄漏都是 malloc、自定义结构、资源引起的，多注意这些地方进行分析。</li>
+<li>开启ARC后，内存泄漏的原因<br>开启了ARC并不是就不会存在内存问题，苹果有句名言：ARC is only for NSObject。</li>
+</ol>
+<p><strong>注：如果你的项目使用了ARC，随着你的操作，不断开启或关闭视图，内存可能持续上升，但这不一定表示存在内存泄漏，ARC释放的时机是不固定的。</strong></p>
+<p><strong>这里对 Display Settings中 的 <code>Call tree</code> 选项做一下说明 [官方user guide翻译]：</strong> </p>
+<ul>
+<li><strong>Separate By Thread：</strong>线程分离,只有这样才能在调用路径中能够清晰看到占用CPU最大的线程.每个线程应该分开考虑。只有这样你才能揪出那些大量占用CPU的”重”线程，按线程分开做分析，这样更容易揪出那些吃资源的问题线程。特别是对于主线程，它要处理和渲染所有的接口数据，一旦受到阻塞，程序必然卡顿或停止响应。</li>
+<li><strong>Invert Call Tree：</strong>从上到下跟踪堆栈信息.这个选项可以快捷的看到方法调用路径最深方法占用CPU耗时（这意味着你看到的表中的方法,将已从第0帧开始取样,这通常你是想要的,只有这样你才能看到CPU中花费时间最深的方法）,比如FuncA{FunB{FunC}},勾选后堆栈以C-&gt;B-&gt;A把调用层级最深的C显示最外面.反向输出调用树。把调用层级最深的方法显示在最上面，更容易找到最耗时的操作。</li>
+<li><strong>Hide Missing Symbols：</strong>如果dSYM无法找到你的APP或者调用系统框架的话，那么表中将看到调用方法名只能看到16进制的数值,勾选这个选项则可以隐藏这些符号，便于简化分析数据.</li>
+<li><strong>Hide System Libraries：</strong>表示隐藏系统的函数，调用这个就更有用了,勾选后耗时调用路径只会显示app耗时的代码,性能分析普遍我们都比较关系自己代码的耗时而不是系统的.基本是必选项.注意有些代码耗时也会纳入系统层级，可以进行勾选前后前后对执行路径进行比对会非常有用.因为通常你只关心cpu花在自己代码上的时间不是系统上的，隐藏系统库文件。过滤掉各种系统调用，只显示自己的代码调用。隐藏缺失符号。如果 dSYM 文件或其他系统架构缺失，列表中会出现很多奇怪的十六进制的数值，用此选项把这些干扰元素屏蔽掉，让列表回归清爽。</li>
+<li><strong>Show Obj-C Only：</strong>只显示oc代码 ,如果你的程序是像OpenGl这样的程序,不要勾选侧向因为他有可能是C++的</li>
+<li><strong>Flatten Recursion：</strong>递归函数, 每个堆栈跟踪一个条目，拼合递归。将同一递归函数产生的多条堆栈（因为递归函数会调用自己）合并为一条。</li>
+<li><strong>Top Functions：</strong>找到最耗时的函数或方法。 一个函数花费的时间直接在该函数中的总和，以及在函数调用该函数所花费的时间的总时间。因此，如果函数A调用B，那么A的时间报告在A花费的时间加上B.花费的时间,这非常真有用，因为它可以让你每次下到调用堆栈时挑最大的时间数字，归零在你最耗时的方法。</li>
+</ul>
+<h1 id="四、Time-Profiler（时间分析器）"><a href="#四、Time-Profiler（时间分析器）" class="headerlink" title="四、Time Profiler（时间分析器）"></a>四、Time Profiler（时间分析器）</h1><p>用来检测app中每个方法所用的时间，并且可以排序，并查找出哪些函数占用了大量时间。</p>
+<p>使用Time Profile前有两点需要注意的地方：<br><strong>1、一定要使用真机调试</strong></p>
+<blockquote>
+<p>在开始进行应用程序性能分析的时候，一定要使用真机。因为模拟器运行在Mac上，然而Mac上的CPU往往比iOS设备要快。相反，Mac上的GPU和iOS设备的完全不一样，模拟器不得已要在软件层面（CPU）模拟设备的GPU，这意味着GPU相关的操作在模拟器上运行的更慢，尤其是使用CAEAGLLayer来写一些OpenGL的代码时候，这就导致模拟器性能数据和用户真机使用性能数据相去甚远</p>
+</blockquote>
+<p><strong>2、应用程序一定要使用发布配置</strong></p>
+<blockquote>
+<p>在发布环境打包的时候，编译器会引入一系列提高性能的优化，例如去掉调试符号或者移除并重新组织代码。另iOS引入一种”Watch Dog”[看门狗]机制，不同的场景下，“看门狗”会监测应用的性能，如果超出了该场景所规定的运行时间，“看门狗”就会强制终结这个应用的进程。开发者可以crashlog看到对应的日志，但Xcode在调试配置下会禁用”Watch Dog”</p>
+</blockquote>
+<p>1）界面详情：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017075.png" alt="1.png"></p>
+<p>2）详细面板</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017300.png" alt="5.png"></p>
+<p>主要是看Call Tree和Sample List这两种视图：</p>
+<p>3）调用树</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017389.png" alt="4.png"></p>
+<p>Running Time：函数运行的时间，这个时间是累积时间<br>Self：在栈顶次数<br>Symbol Name：被调用函数的符号信息</p>
+<p>4）详情面板更多的信息选项</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001017718.png" alt="3.png"></p>
+<p>5）样本列表</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001018569.png" alt="2.png"></p>
+<h1 id="五、Zombies（僵尸）"><a href="#五、Zombies（僵尸）" class="headerlink" title="五、Zombies（僵尸）"></a>五、Zombies（僵尸）</h1><h2 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h2><p>翻译英文：专注于检测<strong>过度释放</strong>的“僵尸”对象。还提供了数据对象分配的类以及所有活动分配内存地址的历史。</p>
+<p>这里我们可以看到一个词语叫“<strong>over-release</strong>”,过度释放。我们在项目中见到最多的就是“EXC_BAD_ACCESS”或者是这样的：<strong>Thread 1: Program received signal:”EXC_BAD_ACCESS”</strong>，这就是访问了被释放的内存地址造成的。</p>
+<p><strong>过度释放，是对同一个对象释放了过多的次数</strong>，其实当引用计数降到0时，对象占用的内存已经被释放掉，此时指向原对象的指针就成了“悬垂指针”，如若再对其进行任何方法的调用，（原则上）都会直接crash（然而由于某些特殊的情况，不会马上crash）。过度释放简单的说就是<strong>对release的对象再release，就是过度释放</strong>。</p>
+<p>我们需要知道这几个概念：</p>
+<blockquote>
+<p>1、内存泄漏：对象使用完没有释放，导致内存浪费。<br>2、僵尸对象：已经被销毁的对象(不能再使用的对象)<br>3、<strong>野指针：指向僵尸对象(不可用内存)的指针。给野指针发消息会报EXC_BAD_ACCECC错误</strong>。<br>4、空指针：没有指向储存空间的指针(里面存的是nil,也就是0)。在oc中使用空指针调中方法不会报错。</p>
+</blockquote>
+<p>注意:为了避免野指针错误的常见方法:在对象被销毁之后,将指向对象的指针变为空指针。</p>
+<p>对于过度释放的问题，可以直接使用Zombie，当过度释放发生时会立即停在发生问题的位置，同时结合内存分配释放历史和调用栈，可以发现问题。至于上文提到的不会crash的原因，其实有很多，比如：</p>
+<blockquote>
+<p>对象内存释放时，所用内存并没有完全被擦除，仍有旧对象部分数据可用</p>
+<p>原内存位置被写入同类或同样结构的数据</p>
+</blockquote>
+<h2 id="2-原理"><a href="#2-原理" class="headerlink" title="2.原理"></a>2.原理</h2><p>我们将僵尸对象“复活”的目的：<strong>僵尸对象就是让已经释放了的对象重新复活，便于调试</strong>；是为了让已经释放了的对象在被再次访问时能够输出一些错误信息。其实这里的“复活”并不是真的复活，而是<strong>强行不死</strong>：这么说吧 相当于 他的RC=0的时候 系统再强行让他RC=1，顺便打上一个标记 zoom，等到你去掉那个沟以后 系统会把带有标记zoom的对象RC=0。</p>
+<h2 id="3-用法"><a href="#3-用法" class="headerlink" title="3.用法"></a>3.用法</h2><p>下边是Instruments里面的Zombies的用法：</p>
+<p>在Launch  Configuration中勾选Record reference counts和Enable NSZombie detection。其中Recordreference counts是显示引用计数，Enable NSZombie detection是能够检测僵尸对象。</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001018918.png" alt="1.png"></p>
+<p>这样在程序运行的时候，如果发现僵尸对象它就会弹出一个对话框，点击其中“→”按钮，在屏幕的下方会显示僵尸对象的详细信息，下图可以看到僵尸对象的引用计数变化情况。</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001019615.png" alt="2.png"></p>
+<p><strong>注意：Zombies模版在使用的时候会导致内存的飙升</strong>，这是因为所有被释放的对象被僵尸对象取代，并未真的释放掉，在结束Zombies时会释放，这是预知行为，这就意味着instrument里的其它工具和Zombies是不能同时使用的，Zombies会导致其它的数据不准。包括leaks，你也不应该把它加到Zombies模版中，即使这么做了结果也没什么意义。对于iOS应用来说，<strong>在用Zombies模版时使用iOS模拟器比真机要好</strong>。</p>
+<p>另外XCode也提供了手动设置NSZombieEnabled环境变量的方法，不过设置NSZombieEnabled为True后，<strong>会导致内存占用的增长</strong>，同时会影响Leaks工具的调试，这是因为设置NSZombieEnabled会用僵尸对象来代替已释放对象。</p>
+<p>点击Product菜单Edit Scheme打开该页面，然后勾选Enable Zombie Objects复选框：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220520001019870.png" alt="3.png"></p>
+<p>最后提醒的是NSZombieEnabled只能在调试的时候使用，千万不要忘记<strong>在产品发布的时候去掉</strong>，因为NSZombieEnabled不会真正去释放dealloc对象的内存，一直开启的话，该死去的对象会一直存在，后果可想而知，自重！</p>
+<h1 id="六、扩展"><a href="#六、扩展" class="headerlink" title="六、扩展"></a>六、扩展</h1><ul>
+<li><p>野指针</p>
+<ul>
+<li>C语言: 当我们声明1个指针变量,没有为这个指针变量赋初始值.这个指针变量的值是1个垃圾指 指向1块随机的内存空间。</li>
+<li>OC语言: 指针指向的对象已经被回收掉了.这个指针就叫做野指针.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><p>僵尸对象</p>
+<ul>
+<li><p>内存回收的本质.</p>
+<ul>
+<li>申请1块空间,实际上是向系统申请1块别人不再使用的空间.</li>
+<li>释放1块空间,指的是占用的空间不再使用,这个时候系统可以分配给别人去使用.</li>
+<li>在这个个空间分配给别人之前 数据还是存在的.<ul>
+<li>OC对象释放以后,表示OC对象占用的空间可以分配给别人.</li>
+<li>但是再分配给别人之前 这个空间仍然存在 对象的数据仍然存在.</li>
+</ul>
+</li>
+<li>僵尸对象: 1个已经被释放的对象 就叫做僵尸对象.</li>
+</ul>
+</li>
+<li><p>使用野指针访问僵尸对象.有的时候会出问题,有的时候不会出问题.</p>
+<ul>
+<li>当野指针指向的僵尸对象所占用的空间还没有分配给别人的时候,      - 这个时候其实是可以访问的.</li>
+<li>因为对象的数据还在.</li>
+<li>当野指针指向的对象所占用的空间分配给了别人的时候 这个时候访问就会出问题.</li>
+<li>所以,你不要通过1个野指针去访问1个僵尸对象.<ul>
+<li>虽然可以通过野指针去访问已经被释放的对象,但是我们不允许这么做.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>僵尸对象检测.<ul>
+<li>默认情况下. Xcode不会去检测指针指向的对象是否为1个僵尸对象. 能访问就访问 不能访问就报错.</li>
+<li>可以开启Xcode的僵尸对象检测. <ul>
+<li>那么就会在通过指针访问对象的时候,检测这个对象是否为1个僵尸对象 如果是僵尸对象 就会报错.</li>
+</ul>
+</li>
+<li>为什么不默认开启僵尸对象检测呢?<ul>
+<li>因为一旦开启,每次通过指针访问对象的时候.都会去检查指针指向的对象是否为僵尸对象.</li>
+<li>那么这样的话 就影响效率了.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>如何避免僵尸对象报错.<ul>
+<li>当1个指针变为野指针以后. 就把这个指针的值设置为nil</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>僵尸对象无法复活.<ul>
+<li>当1个对象的引用计数器变为0以后 这个对象就被释放了.</li>
+<li>就无法取操作这个僵尸对象了. 所有对这个对象的操作都是无效的.</li>
+<li>因为一旦对象被回收 对象就是1个僵尸对象 而访问1个僵尸对象 是没有意义.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>好了，以上就是对于<code>Instruments</code>工具的使用总结<br>喜欢的就点个赞👍吧</p>
+</blockquote>
+<p><strong>参考文章</strong></p>
+<p>Allocations：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/fc517cfdd25e">Xcode8 Instruments 测试工具使用三</a><br>Leaks：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/92cd90e65d4c">Xcode 8 Instruments 学习（一）</a><br>Time Profiler：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9ac281228de2">Xcode 8 Instruments 学习（二）</a><br>Zombies：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9e94e42cfb01">Instruments性能检测</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS/" rel="tag"># iOS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/11/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/%E5%BD%B1%E5%93%8Dapp%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%8B%93%E5%B1%95/" rel="prev" title="影响app性能问题总结及拓展">
+      <i class="fa fa-chevron-left"></i> 影响app性能问题总结及拓展
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/07/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/iOS%20App%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/" rel="next" title="iOS App启动优化">
+      iOS App启动优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81Instruments%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">一、Instruments介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Allocations%EF%BC%88%E5%88%86%E9%85%8D%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">二、Allocations（分配）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%86%85%E5%AD%98%E5%88%86%E7%B1%BB%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">1.内存分类：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Abandoned-memory"><span class="nav-number">2.2.</span> <span class="nav-text">2.Abandoned memory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%AE%BE%E7%BD%AEGenerations"><span class="nav-number">2.3.</span> <span class="nav-text">3.设置Generations</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81Leaks%EF%BC%88%E6%B3%84%E6%BC%8F%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">三、Leaks（泄漏）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%92%8C%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.1.</span> <span class="nav-text">1.内存溢出和内存泄漏的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Time-Profiler%EF%BC%88%E6%97%B6%E9%97%B4%E5%88%86%E6%9E%90%E5%99%A8%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">四、Time Profiler（时间分析器）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81Zombies%EF%BC%88%E5%83%B5%E5%B0%B8%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">五、Zombies（僵尸）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%A6%82%E5%BF%B5"><span class="nav-number">5.1.</span> <span class="nav-text">1.概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%8E%9F%E7%90%86"><span class="nav-number">5.2.</span> <span class="nav-text">2.原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%94%A8%E6%B3%95"><span class="nav-number">5.3.</span> <span class="nav-text">3.用法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%89%A9%E5%B1%95"><span class="nav-number">6.</span> <span class="nav-text">六、扩展</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : '2644fdee6544ed571e558cb406581784',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

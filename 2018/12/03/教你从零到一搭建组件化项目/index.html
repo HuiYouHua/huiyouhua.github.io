@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="组件化的目的就是为了在项目越做越大的时候，进行项目的解耦，在需要加入模块的时候直接pod，不需要是直接删除pod即可，方便快捷，使得项目模块清晰，更加可以自由复用。  前篇介绍了怎么用Cococapods搭建私有仓库，这里我们就用这种方式去搭建我们的组件化项目。  一、概览  搭建组件化项目我们首先需要一个组件的调度中心，这里我借用了casatwy的CTMediator，同时也可以看看他对于组件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="教你从零到一搭建组件化项目">
+<meta property="og:url" content="http://example.com/2018/12/03/%E6%95%99%E4%BD%A0%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%90%AD%E5%BB%BA%E7%BB%84%E4%BB%B6%E5%8C%96%E9%A1%B9%E7%9B%AE/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="组件化的目的就是为了在项目越做越大的时候，进行项目的解耦，在需要加入模块的时候直接pod，不需要是直接删除pod即可，方便快捷，使得项目模块清晰，更加可以自由复用。  前篇介绍了怎么用Cococapods搭建私有仓库，这里我们就用这种方式去搭建我们的组件化项目。  一、概览  搭建组件化项目我们首先需要一个组件的调度中心，这里我借用了casatwy的CTMediator，同时也可以看看他对于组件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235319858.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235319903.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235320039.png">
+<meta property="article:published_time" content="2018-12-02T16:01:53.000Z">
+<meta property="article:modified_time" content="2018-12-02T16:01:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235319858.png">
+
+<link rel="canonical" href="http://example.com/2018/12/03/%E6%95%99%E4%BD%A0%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%90%AD%E5%BB%BA%E7%BB%84%E4%BB%B6%E5%8C%96%E9%A1%B9%E7%9B%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>教你从零到一搭建组件化项目 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/12/03/%E6%95%99%E4%BD%A0%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%90%AD%E5%BB%BA%E7%BB%84%E4%BB%B6%E5%8C%96%E9%A1%B9%E7%9B%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          教你从零到一搭建组件化项目
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-03 00:01:53" itemprop="dateCreated datePublished" datetime="2018-12-03T00:01:53+08:00">2018-12-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BB%84%E4%BB%B6%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">组件化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>组件化的目的就是为了在项目越做越大的时候，进行项目的解耦，在需要加入模块的时候直接pod，不需要是直接删除pod即可，方便快捷，使得项目模块清晰，更加可以自由复用。 </p>
+<p>前篇介绍了怎么用<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9975a364b476">Cococapods搭建私有仓库</a>，这里我们就用这种方式去搭建我们的组件化项目。</p>
+</blockquote>
+<h2 id="一、概览"><a href="#一、概览" class="headerlink" title="一、概览"></a>一、概览</h2><p>  搭建组件化项目我们首先需要一个组件的调度中心，这里我借用了casatwy的<a target="_blank" rel="noopener" href="https://github.com/casatwy/CTMediator">CTMediator</a>，同时也可以看看他对于组件化项目的讲解，<a target="_blank" rel="noopener" href="https://casatwy.com/iOS-Modulization.html" title="Permalink to iOS应用架构谈 组件化方案">iOS应用架构谈 组件化方案</a>]。<br>其次我建立一个主工程HHYMainComponent，还有三个组件模块：HHYComponentA、HHYComponentB、HHYComponentC。</p>
+<p>关系如下：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235319858.png" alt="Snip20181203_1.png"></p>
+<p>下面就开始搭建我们的项目。</p>
+<h2 id="二、搭建项目"><a href="#二、搭建项目" class="headerlink" title="二、搭建项目"></a>二、搭建项目</h2><h4 id="1-创建调度中心"><a href="#1-创建调度中心" class="headerlink" title="1. 创建调度中心"></a>1. 创建调度中心</h4><p>这里我们用CTMediator作为我们的调度中心，创建一个文件夹放入核心代码，初始化podspec文件，并上传到github上。这里不太清楚podspec的可以先去看下前篇文章：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9975a364b476">Cococapods搭建私有仓库</a></p>
+<h4 id="2-创建模块及主工程"><a href="#2-创建模块及主工程" class="headerlink" title="2.创建模块及主工程"></a>2.创建模块及主工程</h4><p>这里每个模块及工程我们各建一个空工程，初始化pod及podspec。<br>到这里我们的项目工程都搭建出来了。下面我们开始分析模块化怎么搭建。</p>
+<h4 id="3-搭建模块ABC"><a href="#3-搭建模块ABC" class="headerlink" title="3.搭建模块ABC"></a>3.搭建模块ABC</h4><p>这里我们以我搭建的HHYComponentA项目为例来讲解。<br>首先我搭建的模块项目目录结构如下：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235319903.png" alt="Snip20181203_2.png"></p>
+<p>一级目录里我们有 podspec 以及 MIT 证书文件，另跟github上的项目关联了，其次二级目录里我们除了初始化的项目工程文件外我们还建了四个文件夹：Controller、CTMediaCategory、Model、Target。<br>这里关于Model文件是我用来做对象类型传值用的，没什么用，暂且不谈了，主要是另外几个文件。</p>
+<ul>
+<li>Controller：就是我们的模块化控制器</li>
+<li>CTMediaCategory：是我们的调度中心CTMediator的一个分类，它主要负责消息的转发及参数的传递。</li>
+<li>Target：它负责通过消息转发之后的消息处理，进行控制器对象的创建并返回。</li>
+</ul>
+<p>这个就是我们创建好后的工程目录结构：</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235320039.png" alt="Snip20181203_3.png"></p>
+<h5 id="1）CTMediator-HHYComponentA"><a href="#1）CTMediator-HHYComponentA" class="headerlink" title="1）CTMediator+HHYComponentA"></a>1）CTMediator+HHYComponentA</h5><p>这里我们先看CTMediator+HHYComponentA文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- (UIViewController *)HHYComponentA:(HHYUser *)user &#123;</span><br><span class="line">    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];</span><br><span class="line">    params[@&quot;user&quot;] = user;</span><br><span class="line">    return [self performTarget:@&quot;HHYComponentA&quot; action:@&quot;HHYComponentA&quot; params:params shouldCacheTarget:NO];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这里我们通过调用调度中心的<strong>performTarget： action： params: shouldCacheTarget:</strong>方法将参数传递进去，同时返回一个控制器。我们进入这个方法看一下。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">- (id)performTarget:(NSString *)targetName action:(NSString *)actionName params:(NSDictionary *)params shouldCacheTarget:(BOOL)shouldCacheTarget</span><br><span class="line">&#123;</span><br><span class="line">    NSString *swiftModuleName = params[kCTMediatorParamsKeySwiftTargetModuleName];</span><br><span class="line">    </span><br><span class="line">    // generate target</span><br><span class="line">    NSString *targetClassString = nil;</span><br><span class="line">    if (swiftModuleName.length &gt; 0) &#123;</span><br><span class="line">        targetClassString = [NSString stringWithFormat:@&quot;%@.Target_%@&quot;, swiftModuleName, targetName];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        targetClassString = [NSString stringWithFormat:@&quot;Target_%@&quot;, targetName];</span><br><span class="line">    &#125;</span><br><span class="line">    NSObject *target = self.cachedTarget[targetClassString];</span><br><span class="line">    if (target == nil) &#123;</span><br><span class="line">        Class targetClass = NSClassFromString(targetClassString);</span><br><span class="line">        target = [[targetClass alloc] init];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // generate action</span><br><span class="line">    NSString *actionString = [NSString stringWithFormat:@&quot;Action_%@:&quot;, actionName];</span><br><span class="line">    SEL action = NSSelectorFromString(actionString);</span><br><span class="line">    </span><br><span class="line">    if (target == nil) &#123;</span><br><span class="line">        // 这里是处理无响应请求的地方之一，这个demo做得比较简单，如果没有可以响应的target，就直接return了。实际开发过程中是可以事先给一个固定的target专门用于在这个时候顶上，然后处理这种请求的</span><br><span class="line">        [self NoTargetActionResponseWithTargetString:targetClassString selectorString:actionString originParams:params];</span><br><span class="line">        return nil;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if (shouldCacheTarget) &#123;</span><br><span class="line">        self.cachedTarget[targetClassString] = target;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if ([target respondsToSelector:action]) &#123;</span><br><span class="line">        return [self safePerformAction:action target:target params:params];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        // 这里是处理无响应请求的地方，如果无响应，则尝试调用对应target的notFound方法统一处理</span><br><span class="line">        SEL action = NSSelectorFromString(@&quot;notFound:&quot;);</span><br><span class="line">        if ([target respondsToSelector:action]) &#123;</span><br><span class="line">            return [self safePerformAction:action target:target params:params];</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 这里也是处理无响应请求的地方，在notFound都没有的时候，这个demo是直接return了。实际开发过程中，可以用前面提到的固定的target顶上的。</span><br><span class="line">            [self NoTargetActionResponseWithTargetString:targetClassString selectorString:actionString originParams:params];</span><br><span class="line">            [self.cachedTarget removeObjectForKey:targetClassString];</span><br><span class="line">            return nil;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这里可以看到这个方法是对消息转发的一个操作，创建了一个Target_ targetName的对象，执行这个对象中的一个Action_actionName的一个方法，并对无target的一个保护操作。</p>
+<h5 id="2）Target-HHYComponentA"><a href="#2）Target-HHYComponentA" class="headerlink" title="2）Target_HHYComponentA"></a>2）Target_HHYComponentA</h5><p>这个文件就是上面消息转发中对应Target_ targetName的对象，里面有一个对应的Action_actionName执行方法。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- (UIViewController *)Action_HHYComponentA:(NSDictionary *)params &#123;</span><br><span class="line">    HHYComponentAViewController *VC = [[HHYComponentAViewController alloc] init];</span><br><span class="line">    VC.user = params[@&quot;user&quot;];</span><br><span class="line">    return VC;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这里返回就是我们创建的模块控制器，通过NSDictionary我们可以传递复杂的参数类型和方法的回调。</p>
+<h5 id="3）HHYComponentAViewController"><a href="#3）HHYComponentAViewController" class="headerlink" title="3）HHYComponentAViewController"></a>3）HHYComponentAViewController</h5><p>这里面我没写什么，就打印了下传递的参数。</p>
+<p>这样，我们的模块组件A就搭建完成了</p>
+<h5 id="4）HHYComponentA-podspec"><a href="#4）HHYComponentA-podspec" class="headerlink" title="4）HHYComponentA.podspec"></a>4）HHYComponentA.podspec</h5><p>这里我们要说一下spec文件，我写的时候被这个文件搞的头大。<br>因为我们的调度中心是放在我们的私有仓库的，模块A引用了私有仓库的文件，而我们的模块又是要放在我们的私有仓库，所以就形成了<strong>私有仓库调用私有仓库</strong><br>因此，我们调用的私有仓库要在spec文件中声明，同时在终端验证的时候也要声明其来源。这个我们在上一篇文章中没有提及<br>另外项目的<strong>目录层级</strong>结构也要注意一下，下面就是我建的spec文件<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Pod::Spec.new do |s|</span><br><span class="line"></span><br><span class="line">  # 项目名称</span><br><span class="line">  s.name         = &quot;HHYComponentA&quot;</span><br><span class="line">  # 项目版本号</span><br><span class="line">  s.version      = &quot;0.0.7&quot;</span><br><span class="line">  # 项目摘要</span><br><span class="line">  s.summary      = &quot;HHYComponentA&quot;</span><br><span class="line">  # 详细描述</span><br><span class="line">  s.description  = &quot;HHYComponentA远程仓库&quot;</span><br><span class="line">  # 仓库主页地址</span><br><span class="line">  s.homepage     = &quot;https://github.com/HuiYouHua/HHYComponentA&quot;</span><br><span class="line"></span><br><span class="line">  # 证书</span><br><span class="line">  s.license      = &#123; :type =&gt; &quot;MIT&quot;, :file =&gt; &quot;LICENSE&quot; &#125;</span><br><span class="line"></span><br><span class="line">  # 作者名称邮箱地址</span><br><span class="line">  s.author             = &#123; &quot;华惠友&quot; =&gt; &quot;793316968@qq.com&quot; &#125;</span><br><span class="line"></span><br><span class="line">  # 平台版本号</span><br><span class="line">  s.platform     = :ios, &quot;8.0&quot;</span><br><span class="line"></span><br><span class="line">  # git源码地址</span><br><span class="line">  s.source       = &#123; :git =&gt; &quot;https://github.com/HuiYouHua/HHYComponentA.git&quot;, :tag =&gt; &quot;#&#123;s.version&#125;&quot; &#125;</span><br><span class="line"></span><br><span class="line">	s.source_files  = &quot;HHYComponentA/HHYComponentA.h&quot;</span><br><span class="line"></span><br><span class="line">	s.subspec &#x27;Controller&#x27; do |c|</span><br><span class="line">	 	c.source_files = &#x27;HHYComponentA/Controller/**/*.&#123;h,m&#125;&#x27;</span><br><span class="line">		c.dependency &quot;HHYComponentA/Model&quot;</span><br><span class="line">	end</span><br><span class="line"></span><br><span class="line">	s.subspec &#x27;Target&#x27; do |t|</span><br><span class="line">		t.source_files = &#x27;HHYComponentA/Target/**/*.&#123;h,m&#125;&#x27;</span><br><span class="line">		t.dependency &quot;HHYComponentA/Controller&quot;</span><br><span class="line">	end</span><br><span class="line">		</span><br><span class="line">	s.subspec &#x27;CTMediaCategory&#x27; do |ct|</span><br><span class="line">	  ct.source_files = &quot;HHYComponentA/CTMediaCategory/**/*.&#123;h,m&#125;&quot;</span><br><span class="line">	  ct.dependency &quot;HHYComponentA/Model&quot;</span><br><span class="line">		end</span><br><span class="line"></span><br><span class="line">	s.subspec &#x27;Model&#x27; do |m|</span><br><span class="line">	  m.source_files = &quot;HHYComponentA/Model/**/*.&#123;h,m&#125;&quot;</span><br><span class="line">		end</span><br><span class="line">      </span><br><span class="line">   s.public_header_files = &quot;HHYComponentA/HHYComponentA.h&quot;</span><br><span class="line"></span><br><span class="line">   # 对私有仓库引用的依赖说明</span><br><span class="line">   s.dependency &#x27;HHYCTMediator&#x27;, &#x27;~&gt; 0.0.3&#x27;</span><br><span class="line">   s.requires_arc     = true</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">end</span><br><span class="line"></span><br></pre></td></tr></table></figure><br>这里面声明的文件就是后面我们<strong>pod install</strong>下来的文件，不需要传的文件就不需要声明了。</p>
+<p>下面进行配置文件的验证及上传命令</p>
+<ul>
+<li><p><strong>pod lib lint —sources=私有spec索引地址,git spec索引地址  —allow-warnings  —use-libraries</strong></p>
+</li>
+<li><p><strong>pod repo push 本地spec索引名称 上传的spec文件 —sources=私有spec索引地址,git spec索引地址 —allow-warnings  —use-libraries</strong><br>eg：</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pod lib lint --sources=https://github.com/HuiYouHua/HHYSpecs.git,https://github.com/CocoaPods/Specs.git  --allow-warnings  --use-libraries</span><br><span class="line"></span><br><span class="line">pod repo push HHYSpecs HHYComponentA.podspec --sources=https://github.com/HuiYouHua/HHYSpecs.git,https://github.com/CocoaPods/Specs.git --allow-warnings  --use-libraries</span><br></pre></td></tr></table></figure>
+<p>同样，其他的三个模块搭建方式基本差不多，我这里只是做了不同参数的处理。到了这里，我们就可以在我们主工程里调用搭建的三个模块了。</p>
+<h2 id="三、主工程进行调用"><a href="#三、主工程进行调用" class="headerlink" title="三、主工程进行调用"></a>三、主工程进行调用</h2><p>模块A:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (IBAction)componentA:(id)sender &#123;</span><br><span class="line">    HHYUser *user = [HHYUser new];</span><br><span class="line">    user.name = @&quot;huayoyu&quot;;</span><br><span class="line">    user.age = 18;</span><br><span class="line">    UIViewController *vc = [[CTMediator sharedInstance] HHYComponentA:user];</span><br><span class="line">    [self.navigationController pushViewController:vc animated:YES];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>模块B：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (IBAction)componentB:(id)sender &#123;</span><br><span class="line">    NSArray *array = @[@&quot;1&quot;, @&quot;2&quot;, @&quot;3&quot;, @&quot;4&quot;];</span><br><span class="line">    UIViewController *vc = [[CTMediator sharedInstance] HHYComponentB:array WithCallback:^(NSArray * _Nonnull dataArray) &#123;</span><br><span class="line">        NSLog(@&quot;%@&quot;,dataArray);</span><br><span class="line">    &#125;];</span><br><span class="line">    [self.navigationController pushViewController:vc animated:YES];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>模块C:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (IBAction)componentC:(id)sender &#123;</span><br><span class="line">    UIViewController *vc = [[CTMediator sharedInstance] HHYComponentCWithCallback:^(NSString * _Nonnull result) &#123;</span><br><span class="line">        NSLog(@&quot;%@&quot;, result);</span><br><span class="line">    &#125;];</span><br><span class="line">    [self.navigationController pushViewController:vc animated:YES];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这样，组件化项目大体就搭建完成了。如果要对模块的增删，只需要对podfile文件进行操作，对入口的增删即可。</p>
+<p>当然，这个只是简单的组件化项目的搭建，真正的项目当然还设计到其他很多东西，比如网络层、数据库、公共视图层、分类、第三方、AOP。。。，这个就需要更深一步的了解了。</p>
+<p>项目git传送门：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYMainComponent">主工程</a><br><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYComponentA">组件A</a><br><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYComponentB">组件B</a><br><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYComponentC">组件C</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYCTMediator">组件调度中心</a><br><a target="_blank" rel="noopener" href="https://github.com/HuiYouHua/HHYSpecs">私有索引仓库HHYSpecs</a><br>喜欢的git给个star哦</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS/" rel="tag"># iOS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/28/Cocoapods%E5%BB%BA%E7%AB%8B%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93/" rel="prev" title="Cocoapods建立远程仓库">
+      <i class="fa fa-chevron-left"></i> Cocoapods建立远程仓库
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/12/05/Runtime%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93%E5%8F%8A%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B/" rel="next" title="Runtime方法总结及部分案例">
+      Runtime方法总结及部分案例 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">一、概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">二、搭建项目</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E8%B0%83%E5%BA%A6%E4%B8%AD%E5%BF%83"><span class="nav-number">2.0.1.</span> <span class="nav-text">1. 创建调度中心</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%88%9B%E5%BB%BA%E6%A8%A1%E5%9D%97%E5%8F%8A%E4%B8%BB%E5%B7%A5%E7%A8%8B"><span class="nav-number">2.0.2.</span> <span class="nav-text">2.创建模块及主工程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%90%AD%E5%BB%BA%E6%A8%A1%E5%9D%97ABC"><span class="nav-number">2.0.3.</span> <span class="nav-text">3.搭建模块ABC</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89CTMediator-HHYComponentA"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">1）CTMediator+HHYComponentA</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89Target-HHYComponentA"><span class="nav-number">2.0.3.2.</span> <span class="nav-text">2）Target_HHYComponentA</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%EF%BC%89HHYComponentAViewController"><span class="nav-number">2.0.3.3.</span> <span class="nav-text">3）HHYComponentAViewController</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%EF%BC%89HHYComponentA-podspec"><span class="nav-number">2.0.3.4.</span> <span class="nav-text">4）HHYComponentA.podspec</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%BB%E5%B7%A5%E7%A8%8B%E8%BF%9B%E8%A1%8C%E8%B0%83%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">三、主工程进行调用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : 'fab1a689f81dcc46ee52d2fb2a465a86',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

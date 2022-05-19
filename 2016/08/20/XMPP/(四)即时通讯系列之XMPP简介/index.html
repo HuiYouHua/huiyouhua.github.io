@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前面关于即时通讯基础Socket,大家学习使用XMPP之前可以先看看即时通讯系列之Socket简介 前言 前段时间使用XMPPFramework完成了一个仿微信的小项目,故特此来记录下即时通讯开发过程中的知识点以及存在一些问题,欢迎大家前来指教.关于仿微信的demo在后面的篇章中会有github地址,请关注. 本篇是关于XMPP的相关介绍  1.为什么选择XMPP协议在IETF 中，把IM协议划分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(四)即时通讯系列之XMPP简介">
+<meta property="og:url" content="http://example.com/2016/08/20/XMPP/(%E5%9B%9B)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E7%B3%BB%E5%88%97%E4%B9%8BXMPP%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="前面关于即时通讯基础Socket,大家学习使用XMPP之前可以先看看即时通讯系列之Socket简介 前言 前段时间使用XMPPFramework完成了一个仿微信的小项目,故特此来记录下即时通讯开发过程中的知识点以及存在一些问题,欢迎大家前来指教.关于仿微信的demo在后面的篇章中会有github地址,请关注. 本篇是关于XMPP的相关介绍  1.为什么选择XMPP协议在IETF 中，把IM协议划分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519233949921.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519233949979.png">
+<meta property="article:published_time" content="2016-08-19T16:04:53.000Z">
+<meta property="article:modified_time" content="2016-08-19T16:04:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="Object-C">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519233949921.png">
+
+<link rel="canonical" href="http://example.com/2016/08/20/XMPP/(%E5%9B%9B)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E7%B3%BB%E5%88%97%E4%B9%8BXMPP%E7%AE%80%E4%BB%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>(四)即时通讯系列之XMPP简介 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/08/20/XMPP/(%E5%9B%9B)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E7%B3%BB%E5%88%97%E4%B9%8BXMPP%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          (四)即时通讯系列之XMPP简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-08-20 00:04:53" itemprop="dateCreated datePublished" datetime="2016-08-20T00:04:53+08:00">2016-08-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/XMPP/" itemprop="url" rel="index"><span itemprop="name">XMPP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前面关于即时通讯基础Socket,大家学习使用XMPP之前可以先看看<br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/94b138362173">即时通讯系列之Socket简介</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>前段时间使用XMPPFramework完成了一个仿微信的小项目,故特此来记录下即时通讯开发过程中的知识点以及存在一些问题,欢迎大家前来指教.<br>关于仿微信的demo在后面的篇章中会有github地址,请关注.</p>
+<p>本篇是关于XMPP的相关介绍</p>
+</blockquote>
+<h3 id="1-为什么选择XMPP协议"><a href="#1-为什么选择XMPP协议" class="headerlink" title="1.为什么选择XMPP协议"></a>1.为什么选择XMPP协议</h3><p>在IETF 中，把IM协议划分为四种协议，即即时信息和出席协议(Instant Messaging and Presence Protocol, IMPP)、出席和即时信息协议(Presence and Instant Messaging Protocol, PRIM)、针对即时信息和出席扩展的会话发起协议(Session Initiation Protocol for Instant Messaging and Presence Leveraging Extensions, SIMPLE)，以及可扩展的消息出席协议(XMPP)</p>
+<p>XMPP协议的前身是Jabber，我们采取XMPP协议主来实现IM主要是考虑XMPP协议是以XML为基础的，它继承了在XML环境中灵活的发展性。这表明XMPP是可扩展的，所以XMPP信息不仅可以是简单的文本，而且可以携带复杂的数据和各种格式的文件</p>
+<ul>
+<li><p>1.XMPP 协议是公开的，由JSF开源社区组织开发的。XMPP 协议并不属于任何的机构和个人，而是属于整个社区，这一点从根本上保证了其开放性。</p>
+</li>
+<li><p>2.XMPP 协议具有良好的扩展性。在XMPP 中，即时消息和到场信息都是基于XML 的结构化信息，这些信息以XML 节(XML Stanza)的形式在通信实体间交换。XMPP 发挥了XML 结构化数据的通用传输层的作用，它将出席和上下文敏感信息嵌入到XML 结构化数据中，从而使数据以极高的效率传送给最合适的资源。基于XML 建立起来的应用具有良好的语义完整性和扩展性。</p>
+</li>
+<li><p>3.分布式的网络架构。XMPP 协议都是基于Client/Server 架构，但是XMPP协议本身并没有这样的限制。网络的架构和电子邮件十分相似，但没有结合任何特定的网络架构，适用范围非常广泛。</p>
+</li>
+<li><p>4.XMPP 具有很好的弹性。XMPP 除了可用在即时通信的应用程序，还能用在网络管理、内容供稿、协同工具、档案共享、游戏、远端系统监控等。</p>
+</li>
+<li><p>5.安全性。XMPP在Client-to-Server通信，和Server-to-Server通信中都使用TLS (Transport Layer Security)协议作为通信通道的加密方法，保证通信的安全。任何XMPP服务器可以独立于公众XMPP网络（例如在企业内部网络中），而使用SASL及TLS等技术更加增强了通信的安全性。如下图所示：</p>
+</li>
+</ul>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519233949921.png" alt=".png"></p>
+<h3 id="2-XMPP的基本网络结构"><a href="#2-XMPP的基本网络结构" class="headerlink" title="2.XMPP的基本网络结构"></a>2.XMPP的基本网络结构</h3><p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519233949979.png" alt="xmpp的基本网络结构.png"></p>
+<p>XMPP是一个典型的C/S架构，而不是像大多数即时通讯软件一样，使用P2P客户端到客户端的架构，也就是说在大多数情况下，当两个客户端进行通讯时，他们的消息都是通过服务器传递的(也有例外，例如在两个客户端传输文件时)．采用这种架构，主要是为了简化客户端，将大多数工作放在服务器端进行，这样，客户端的工作就比较简单，而且，当增加功能时，多数是在服务器端进行．XMPP服务的框架结构如下图所示．XMPP中定义了三个角色，XMPP客户端，XMPP服务器、网关．通信能够在这三者的任意两个之间双向发生．服务器同时承担了客户端信息记录、连接管理和信息的路由功能．网关承担着与异构即时通信系统的互联互通，异构系统可以包括SMS(短信)、MSN、ICQ等．基本的网络形式是单客户端通过TCP／IP连接到单服务器，然后在之上传输XML，工作原理是：</p>
+<p>(1)节点连接到服务器；<br>(2)服务器利用本地目录系统中的证书对其认证；<br>(3)节点指定目标地址，让服务器告知目标状态；<br>(4)服务器查找、连接并进行相互认证；<br>(5)节点之间进行交互．</p>
+<h3 id="3-XMPP客户端"><a href="#3-XMPP客户端" class="headerlink" title="3.XMPP客户端"></a>3.XMPP客户端</h3><p>XMPP 系统的一个设计标准是必须支持简单的客户端。事实上，XMPP 系统架构对客户端只有很少的几个限制。一个XMPP 客户端必须支持的功能有：</p>
+<ol>
+<li><p>通过 TCP 套接字与XMPP 服务器进行通信；</p>
+</li>
+<li><p>解析组织好的 XML 信息包；</p>
+</li>
+<li><p>理解消息数据类型。</p>
+</li>
+</ol>
+<p>XMPP 将复杂性从客户端转移到服务器端。这使得客户端编写变得非常容易，更新系统功能也同样变得容易。XMPP 客户端与服务端通过XML 在TCP 套接字的5222 端口进行通信，而不需要客户端之间直接进行通信。</p>
+<p>基本的XMPP 客户端必须实现以下标准协议（XEP-0211）：</p>
+<p>RFC3920 核心协议Core</p>
+<p>RFC3921 即时消息和出席协议Instant Messaging and Presence</p>
+<p>XEP-0030 服务发现Service Discovery</p>
+<p>XEP-0115 实体能力Entity Capabilities</p>
+<h3 id="4-XMPP服务器"><a href="#4-XMPP服务器" class="headerlink" title="4.XMPP服务器"></a>4.XMPP服务器</h3><p>XMPP 服务器遵循两个主要法则：</p>
+<p>l  监听客户端连接，并直接与客户端应用程序通信；</p>
+<p>l  与其他 XMPP 服务器通信；</p>
+<p>XMPP开源服务器一般被设计成模块化，由各个不同的代码包构成，这些代码包分别处理Session管理、用户和服务器之间的通信、服务器之间的通信、DNS（Domain Name System）转换、存储用户的个人信息和朋友名单、保留用户在下线时收到的信息、用户注册、用户的身份和权限认证、根据用户的要求过滤信息和系统记录等。另外，服务器可以通过附加服务来进行扩展，如完整的安全策略，允许服务器组件的连接或客户端选择，通向其他消息系统的网关。</p>
+<p>基本的XMPP 服务器必须实现以下标准协议</p>
+<p>RFC3920 核心协议Core</p>
+<p>RFC3921 即时消息和出席协议Instant Messaging and Presence</p>
+<p>XEP-0030 服务发现Service Discovery</p>
+<h3 id="5-XMPP网关"><a href="#5-XMPP网关" class="headerlink" title="5.XMPP网关"></a>5.XMPP网关</h3><p>XMPP 突出的特点是可以和其他即时通信系统交换信息和用户在线状况。由于协议不同，XMPP 和其他系统交换信息必须通过协议的转换来实现，目前几种主流即时通信协议都没有公开，所以XMPP 服务器本身并没有实现和其他协议的转换，但它的架构允许转换的实现。实现这个特殊功能的服务端在XMPP 架构里叫做网关(gateway)。目前，XMPP 实现了和AIM、ICQ、IRC、MSN Massager、RSS0.9 和Yahoo Massager 的协议转换。由于网关的存在，XMPP 架构事实上兼容所有其他即时通信网络，这无疑大大提高了XMPP 的灵活性和可扩展性。</p>
+<h3 id="6-服务器端介绍"><a href="#6-服务器端介绍" class="headerlink" title="6.服务器端介绍"></a>6.服务器端介绍</h3><h5 id="6-1-什么是Openfire"><a href="#6-1-什么是Openfire" class="headerlink" title="6.1 什么是Openfire"></a>6.1 什么是Openfire</h5><p>Openfire 采用Java开发，开源的实时协作（RTC）服务器基于XMPP（Jabber）协议。您可以使用它轻易的构建高效率的即时通信服务器.</p>
+<p>Openfire安装和使用都非常简单，并利用Web进行管理。单台服务器可支持上万并发用户。</p>
+<p>由于是采用开放的XMPP协议，您可以使用各种支持XMPP协议的IM客户端软件登陆服务.</p>
+<h5 id="6-2为什么使用Openfire"><a href="#6-2为什么使用Openfire" class="headerlink" title="6.2为什么使用Openfire"></a>6.2为什么使用Openfire</h5><p>A、Openfire为Java开源项目</p>
+<p>B、 采用开放的XMPP协议</p>
+<p>C、 有多种针对不通系统的版本</p>
+<p>D、使用Socket通讯</p>
+<p>E、 单台服务器可支持上万并发用户,搭建分布式云服务器可轻松提供大量并发用户。</p>
+<p>F、 Socket长连接</p>
+<p>G、服务器稳定</p>
+<p>H、提供接口，可自己开发插件</p>
+<h3 id="7-XMPP协议的组成"><a href="#7-XMPP协议的组成" class="headerlink" title="7.XMPP协议的组成"></a>7.XMPP协议的组成</h3><p>RFC 3920 XMPP：核心。定义了XMPP 协议框架下应用的网络架构，引入了XML Stream（XML 流）与XML Stanza（XML 节），并规定XMPP 协议在通信过程中使用的XML 标签。使用XML 标签从根本上说是协议开放性与扩展性的需要。此外，在通信的安全方面，把TLS 安全传输机制与SASL 认证机制引入到内核，与XMPP 进行无缝的连接，为协议的安全性、可靠性奠定了基础。Core 文档还规定了错误的定义及处理、XML 的使用规范、JID（Jabber Identifier，Jabber 标识符）的定义、命名规范等等。所以这是所有基于XMPP 协议的应用都必需支持的文档。</p>
+<p>RFC 3921：用户成功登陆到服务器之后，发布更新自己的在线好友管理、发送即时聊天消息等业务。所有的这些业务都是通过三种基本的XML 节来完成的：IQ Stanza（IQ 节）, Presence Stanza（Presence 节）, Message Stanza（Message 节）。RFC3921 还对阻塞策略进行了定义，定义是多种阻塞方式。可以说，RFC3921 是RFC3920 的充分补充。两个文档结合起来，就形成了一个基本的即时通信协议平台，在这个平台上可以开发出各种各样的应用。</p>
+<p>XEP-0030 服务搜索。一个强大的用来测定XMPP 网络中的其它实体所支持特性的协议。</p>
+<p>XEP-0115 实体性能。XEP-0030 的一个通过即时出席的定制，可以实时改变交变广告功能。</p>
+<p>XEP-0045 多人聊天。一组定义参与和管理多用户聊天室的协议，类似于Internet 的Relay Chat，具有很高的安全性。</p>
+<p>XEP-0096 文件传输。定义了从一个XMPP 实体到另一个的文件传输。</p>
+<p>XEP-0124 HTTP 绑定。将XMPP 绑定到HTTP 而不是TCP，主要用于不能够持久的维持与服务器TCP 连接的设备。</p>
+<p>XEP-0166 Jingle。规定了多媒体通信协商的整体架构。</p>
+<p>XEP-0167 Jingle Audio Content Description Format。定义了从一个XMPP 实体到另一个的语音传输过程。</p>
+<p>XEP-0176 Jingle ICE（Interactive Connectivity Establishment）Transport。ICE传输机制，文件解决了如何让防火墙或是NAT（Network Address Translation）保护下的实体建立连接的问题。</p>
+<p>XEP-0177 Jingle Raw UDP Transport。纯UDP 传输机制，文件讲述了如何在没有防火墙且在同一网络下建立连接的。</p>
+<p>XEP-0180 Jingle Video Content Description Format。定义了从一个XMPP 实体到另一个的视频传输过程。</p>
+<p>XEP-0181 Jingle DTMF（Dual Tone Multi-Frequency）。</p>
+<p>XEP-0183 Jingle Telepathy Transport Method。</p>
+<h3 id="8-XMPP地址格式"><a href="#8-XMPP地址格式" class="headerlink" title="8.XMPP地址格式"></a>8.XMPP地址格式</h3><p>一个实体在XMPP网络结构中被称为一个接点，它有唯一的标示符jabber identifier(JID)，即实体地址，用来表示一个Jabber用户，但是也可以表示其他内容，例如一个聊天室．一个有效的JID包括一系列元素：(1)域名(domain identifier)；(2)节点(node identifier)；(3)源(resource identifier)．它的格式是node@domain/resource，node@domain ，类似电子邮件的地址格式．domain用来表示接点不同的设备或位置，这个是可选的，例如a在Server1上注册了一个用户，用户名为doom，那么a的JID就是doom@serverl，在发送消息时，指明doom@serverl就可以了，resource可以不用指定，但a在登录到这个Server时，fl的JID可能是doom@serverl、exodus(如果a用Exodus软件登录)，也可能是doom@serverl/psi(如果a用psi软件登录)．资源只用来识别属于用户的位置或设备等，一个用户可以同时以多种资源与同一个XMPP服务器连接。</p>
+<p>XMPP消息格式<br>XMPP通信原语有3种：message、presence和iq。</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">message</span><br><span class="line"></span><br><span class="line">message是一种基本推送消息方法，它不要求响应。主要用于IM、groupChat、alert和notification之类的应用中。</span><br><span class="line"></span><br><span class="line">主要属性如下：</span><br><span class="line"></span><br><span class="line">type属性，它主要有5种类型：</span><br><span class="line"></span><br><span class="line">normal：类似于email，主要特点是不要求响应；</span><br><span class="line"></span><br><span class="line">chat：类似于qq里的好友即时聊天，主要特点是实时通讯；</span><br><span class="line"></span><br><span class="line">groupchat：类似于聊天室里的群聊；</span><br><span class="line"></span><br><span class="line">headline：用于发送alert和notification；</span><br><span class="line"></span><br><span class="line">error：如果发送message出错，发现错误的实体会用这个类别来通知发送者出错了；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">to属性：标识消息的接收方。</span><br><span class="line"></span><br><span class="line">from属性：指发送方的名字或标示。为防止地址外泄，这个地址通常由发送者的server填写，而不是发送者。</span><br><span class="line"></span><br><span class="line">载荷（payload）：例如body，subject,thread</span><br><span class="line"></span><br><span class="line">例子：</span><br><span class="line"></span><br><span class="line">&lt;message </span><br><span class="line"></span><br><span class="line">  to=&quot;lily@jabber.org/contact&quot; </span><br><span class="line"></span><br><span class="line">  type=&quot;chat&quot; &gt;</span><br><span class="line"></span><br><span class="line">    &lt;body&gt; 你好，在忙吗&lt;/body&gt;</span><br><span class="line"></span><br><span class="line">&lt;/message&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">presence</span><br><span class="line"></span><br><span class="line">presence用来表明用户的状态，如：online、away、dnd(请勿打扰)等。当改变自己的状态时，就会在stream的上下文中插入一个Presence元素，来表明自身的状态。要想接受presence消息，必须经过一个叫做presence subscription的授权过程。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">属性：</span><br><span class="line"></span><br><span class="line">type属性，非必须。有以下类别</span><br><span class="line"></span><br><span class="line">subscribe：订阅其他用户的状态</span><br><span class="line"></span><br><span class="line">probe：请求获取其他用户的状态</span><br><span class="line"></span><br><span class="line">unavailable：不可用，离线（offline）状态</span><br><span class="line"></span><br><span class="line">to属性：标识消息的接收方。</span><br><span class="line"></span><br><span class="line">from属性：指发送方的名字或标示。</span><br><span class="line"></span><br><span class="line">载荷（payload）：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">show：</span><br><span class="line"></span><br><span class="line">chat：聊天中</span><br><span class="line"></span><br><span class="line">away：暂时离开</span><br><span class="line"></span><br><span class="line">xa：eXtend Away，长时间离开</span><br><span class="line"></span><br><span class="line">dnd：勿打扰</span><br><span class="line"></span><br><span class="line">status：格式自由，可阅读的文本。也叫做rich presence或者extended presence，常用来表示用户当前心情，活动，听的歌曲，看的视频，所在的聊天室，访问的网页，玩的游戏等等。</span><br><span class="line"></span><br><span class="line">priority：范围-128~127。高优先级的resource能接受发送到bare JID的消息，低优先级的resource不能。优先级为负数的resource不能收到发送到bare JID的消息。</span><br><span class="line"></span><br><span class="line">例子：</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;presence from=&quot;alice@wonderland.lit/pda&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;show&gt;xa&lt;/show&gt;</span><br><span class="line"></span><br><span class="line">  &lt;status&gt;down the rabbit hole!&lt;/status&gt;</span><br><span class="line"></span><br><span class="line">&lt;/presence&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">iq （Info / Query）</span><br><span class="line"></span><br><span class="line">一种请求／响应机制，从一个实体从发送请求，另外一个实体接受请求，并进行响应。例如，client在stream的上下文中插入一个元素，向Server请求得到自己的好友列表，Server返回一个，里面是请求的结果。</span><br><span class="line"></span><br><span class="line">主要的属性是type。包括:</span><br><span class="line"></span><br><span class="line">Get :获取当前域值。类似于http get方法。</span><br><span class="line"></span><br><span class="line">Set :设置或替换get查询的值。类似于http put方法。</span><br><span class="line"></span><br><span class="line">Result :说明成功的响应了先前的查询。类似于http状态码200。</span><br><span class="line"></span><br><span class="line">Error: 查询和响应中出现的错误。</span><br><span class="line"></span><br><span class="line">例子：</span><br><span class="line"></span><br><span class="line">&lt;iq from=&quot;alice@wonderland.lit/pda&quot; </span><br><span class="line"></span><br><span class="line">    id=&quot;rr82a1z7&quot;</span><br><span class="line"></span><br><span class="line">    to=&quot;alice@wonderland.lit&quot; </span><br><span class="line"></span><br><span class="line">    type=&quot;get&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;query xmlns=&quot;jabber:iq:roster&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;/iq&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>XMPP 3920 最靠谱的中文翻译文档</p>
+<p><a target="_blank" rel="noopener" href="http://wenku.baidu.com/view/563b1ebff121dd36a32d8225.html">http://wenku.baidu.com/view/563b1ebff121dd36a32d8225.html</a></p>
+<p>XMPP-RFC3921中文</p>
+<p><a target="_blank" rel="noopener" href="http://wenku.baidu.com/view/37ac3efafab069dc502201c7.html">http://wenku.baidu.com/view/37ac3efafab069dc502201c7.html</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Object-C/" rel="tag"># Object-C</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/08/20/XMPP/(%E4%B8%89)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E7%B3%BB%E5%88%97%E4%B9%8BUDPSocket/" rel="prev" title="(三)即时通讯系列之UDPSocket">
+      <i class="fa fa-chevron-left"></i> (三)即时通讯系列之UDPSocket
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/08/20/XMPP/(%E4%BA%94)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8Bmac%E4%B8%8A%E5%AE%89%E8%A3%85MySQL/" rel="next" title="(五)即时通讯之mac上安装MySQL">
+      (五)即时通讯之mac上安装MySQL <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9XMPP%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.1.</span> <span class="nav-text">1.为什么选择XMPP协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-XMPP%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">2.XMPP的基本网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-XMPP%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">1.3.</span> <span class="nav-text">3.XMPP客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-XMPP%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.4.</span> <span class="nav-text">4.XMPP服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-XMPP%E7%BD%91%E5%85%B3"><span class="nav-number">1.5.</span> <span class="nav-text">5.XMPP网关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.6.</span> <span class="nav-text">6.服务器端介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#6-1-%E4%BB%80%E4%B9%88%E6%98%AFOpenfire"><span class="nav-number">1.6.0.1.</span> <span class="nav-text">6.1 什么是Openfire</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-2%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8Openfire"><span class="nav-number">1.6.0.2.</span> <span class="nav-text">6.2为什么使用Openfire</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-XMPP%E5%8D%8F%E8%AE%AE%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">1.7.</span> <span class="nav-text">7.XMPP协议的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-XMPP%E5%9C%B0%E5%9D%80%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.8.</span> <span class="nav-text">8.XMPP地址格式</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : 'a294833d362fad33370f54846a1d6f24',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

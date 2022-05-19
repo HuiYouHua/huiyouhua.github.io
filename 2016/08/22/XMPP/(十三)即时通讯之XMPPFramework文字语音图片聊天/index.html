@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 这也是本人第一次琢磨关于即时通讯方面的内容,结合网上查看的相关资料搭建出来的仿微信小demo,如有意见请多多指教  具体项目可以在githubWeiChat下载进行查看,如若各位看官老爷觉得还可以请点star 续前篇(十)即时通讯之XMPPFramework登陆注册 续前篇(十一)即时通讯之XMPPFramework电子名片 续前篇(十二)即时通讯之XMPPFramework花名册  123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(十三)即时通讯之XMPPFramework文字语音图片聊天">
+<meta property="og:url" content="http://example.com/2016/08/22/XMPP/(%E5%8D%81%E4%B8%89)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E6%96%87%E5%AD%97%E8%AF%AD%E9%9F%B3%E5%9B%BE%E7%89%87%E8%81%8A%E5%A4%A9/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="前言 这也是本人第一次琢磨关于即时通讯方面的内容,结合网上查看的相关资料搭建出来的仿微信小demo,如有意见请多多指教  具体项目可以在githubWeiChat下载进行查看,如若各位看官老爷觉得还可以请点star 续前篇(十)即时通讯之XMPPFramework登陆注册 续前篇(十一)即时通讯之XMPPFramework电子名片 续前篇(十二)即时通讯之XMPPFramework花名册  123">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235557364.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235615975.gif">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235625563.gif">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235633223.gif">
+<meta property="article:published_time" content="2016-08-21T16:03:53.000Z">
+<meta property="article:modified_time" content="2016-08-21T16:03:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="Object-C">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235557364.png">
+
+<link rel="canonical" href="http://example.com/2016/08/22/XMPP/(%E5%8D%81%E4%B8%89)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E6%96%87%E5%AD%97%E8%AF%AD%E9%9F%B3%E5%9B%BE%E7%89%87%E8%81%8A%E5%A4%A9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>(十三)即时通讯之XMPPFramework文字语音图片聊天 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/08/22/XMPP/(%E5%8D%81%E4%B8%89)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E6%96%87%E5%AD%97%E8%AF%AD%E9%9F%B3%E5%9B%BE%E7%89%87%E8%81%8A%E5%A4%A9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          (十三)即时通讯之XMPPFramework文字语音图片聊天
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-08-22 00:03:53" itemprop="dateCreated datePublished" datetime="2016-08-22T00:03:53+08:00">2016-08-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/XMPP/" itemprop="url" rel="index"><span itemprop="name">XMPP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><blockquote>
+<p>这也是本人第一次琢磨关于即时通讯方面的内容,结合网上查看的相关资料搭建出来的仿微信小demo,如有意见请多多指教</p>
+</blockquote>
+<p><strong>具体项目可以在github<a target="_blank" rel="noopener" href="https://git.oschina.net/huyoyu/WeiChat">WeiChat</a>下载进行查看,如若各位看官老爷觉得还可以请点star</strong></p>
+<p>续前篇<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/6b3c12790f8e">(十)即时通讯之XMPPFramework登陆注册</a></p>
+<p>续前篇<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/b1be451ccf5c">(十一)即时通讯之XMPPFramework电子名片</a></p>
+<p>续前篇<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/e542856d24a9">(十二)即时通讯之XMPPFramework花名册</a></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519235557364.png" alt="服务器地址"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">**Attention,这里需要改成自己的服务器地址和端口号</span><br><span class="line">并且数据库和服务器一定要开启哟,不然没法登陆的哟**</span><br><span class="line">#ifdef DEBUG</span><br><span class="line">#define kHostName @&quot;192.168.199.111&quot;</span><br><span class="line">//#define kHostName @&quot;127.0.0.1&quot;</span><br><span class="line">#define kHostPort 5222</span><br><span class="line">#else</span><br><span class="line">#define kHostNanme @&quot;&quot;</span><br><span class="line">#define kHostPort 5222</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+<p>先来谈谈做聊天功能的感想,其实吧,这个也不复杂,主要是界面搭建过于麻烦,先来说<strong>功能实现:</strong></p>
+<blockquote>
+<p>1.关于聊天功能,当日这个包括有文字,语音,图片,还有文件传输,视频音频聊天,这些我就没写了,就实现了文字,语音,图片这三个部分,后面的再写也没多大意思了.<br>2.其实关于聊天说到底就一个方法sendElement:(NSXMLElement *)element,后面跟上你要发送的内容就行了.<br>3.既然有各种不同的聊天内容,那就要加上关键字进行判断来区分是文字是语音还是图片.<br>4.这区分不同内容也有好几种方式<br>5.对于发送内容有两种方式,当日是对于语音图片,这种大容量的内容来说的,第一种是使用XML来携带内容,这种方式对服务器压力很大,因为一旦携带的内容过大,那么就会使传输速度变得很慢.另一种是通过文件服务器的方式,通过put将要传输方式发送到文件服务器,然后发送URL就可以了,对于文件的传输与接收都是通过上传下载来完成.这两种方式都有实现,可以看demo.<br>6.聊天功能最重要的就是你要知道你传输的message的结构是什么样的,由于是用XML组织的,所以很容易就能知道你传输的内容组织,这样能方便你进行区分传输内容以及扩展你想要的一些功能,还要做一些回执操作,以及类似心跳包之类的操作.</p>
+</blockquote>
+<p>再来说说<strong>界面实现:</strong></p>
+<blockquote>
+<p>1.首先重中之重是得选择一个好的设计模式了,这里采用MVVM,将原先的数据模型分为数据模型加frame模型,其业务逻辑分开,在获取数据时,就对数据和frame进行计算,再在单元格初始化的时候进行赋值.<br>2.其次是frame的计算,因为有文字,图片,语音所以得慢慢计算单元格的自适应高度.<br>3.对于键盘的处理,这个其实蛮复杂的,尤其是点击发文件按钮后,弹出的一个自定义模块,这个你们看demo吧,不过多阐述了,这里主要讲的是功能实现,界面实现就发挥你们的想象力好了.<br>4.另外还有对于界面处理的诸多细节,demo中也有部分未处理好,万望谅解.</p>
+</blockquote>
+<p>看图:<br>这里高度有点不对,但是并没找到原因<br><strong>注意,这里需要模拟器和真机进行测试,展示给读者的是模拟器,真机就没有展示出来了</strong><br><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235615975.gif" alt="文字聊天.gif"></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235625563.gif" alt="图片聊天.gif"></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/strip-20220519235633223.gif" alt="语音聊天"></p>
+<blockquote>
+<p>丑话说在中间,聊天界面还存在有一个bug,暂且还没找出来为什么,但不影响使用</p>
+</blockquote>
+<p>本篇讲的是聊天功能中的聊天功能的实现,内容有点长,请耐心观看.</p>
+<h3 id="1-聊天模块激活"><a href="#1-聊天模块激活" class="headerlink" title="1.聊天模块激活"></a>1.聊天模块激活</h3><p>没什么好说的,跟前面的一样,聊天模块激活<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *  XMPPMessageArchiving聊天模块激活</span><br><span class="line"> */</span><br><span class="line">self.archivingStorage = [XMPPMessageArchivingCoreDataStorage sharedInstance];</span><br><span class="line">self.messageArchiving = [[XMPPMessageArchiving alloc] initWithMessageArchivingStorage:self.archivingStorage dispatchQueue:dispatch_get_main_queue()];</span><br><span class="line">[self.messageArchiving activate:self.stream];</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-发送文字聊天内容"><a href="#2-发送文字聊天内容" class="headerlink" title="2.发送文字聊天内容"></a>2.发送文字聊天内容</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - TextView的代理方法 点击renturn发送信息</span><br><span class="line">#pragma mark 发送文字聊天信息</span><br><span class="line">- (void)textViewDidChange:(UITextView *)textView &#123;</span><br><span class="line">    if ([textView.text hasSuffix:@&quot;\n&quot;]) &#123;</span><br><span class="line">        NSLog(@&quot;已经发送消息&quot;);</span><br><span class="line">        [self sendMessageWithText:textView.text bodyType:@&quot;text&quot;];</span><br><span class="line">        textView.text = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)sendMessageWithText:(NSString *)text bodyType:(NSString *)type &#123;</span><br><span class="line">//    XMPPMessage *message = [XMPPMessage messageWithType:@&quot;chat&quot; to:self.jidChatTo.jid];</span><br><span class="line">//    // 设置bodyType为text</span><br><span class="line">//    [message addAttributeWithName:@&quot;bodyType&quot; stringValue:type];</span><br><span class="line">//    [message addBody:text];</span><br><span class="line">//    [[XMPPManager sharedmanager].stream sendElement:message];</span><br><span class="line">    </span><br><span class="line">    XMPPMessage* message = [[XMPPMessage alloc] initWithType:@&quot;chat&quot; to:self.jidChatTo.jid];</span><br><span class="line">    </span><br><span class="line">    [message addBody:type];</span><br><span class="line">    </span><br><span class="line">    // 设置节点内容</span><br><span class="line">    XMPPElement *attachment = [XMPPElement elementWithName:@&quot;attachment&quot; stringValue:text];</span><br><span class="line">    // 包含子节点</span><br><span class="line">    [message addChild:attachment];</span><br><span class="line">    [[XMPPManager sharedmanager].stream sendElement:message];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-获取文字聊天内容"><a href="#3-获取文字聊天内容" class="headerlink" title="3.获取文字聊天内容"></a>3.获取文字聊天内容</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">- (void)relodChatMessage &#123;</span><br><span class="line">    XMPPManager *manager = [XMPPManager sharedmanager];</span><br><span class="line">    NSManagedObjectContext *context = manager.archivingStorage.mainThreadManagedObjectContext;</span><br><span class="line">    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@&quot;XMPPMessageArchiving_Message_CoreDataObject&quot;];</span><br><span class="line">    </span><br><span class="line">    NSPredicate *predicate = [NSPredicate predicateWithFormat:@&quot;streamBareJidStr=%@ AND bareJidStr=%@&quot;,[UserManager sharedmanager].jid,self.jidChatTo.jid.bare];</span><br><span class="line">    </span><br><span class="line">    NSSortDescriptor *timeSort = [NSSortDescriptor sortDescriptorWithKey:@&quot;timestamp&quot; ascending:YES];</span><br><span class="line">    request.sortDescriptors = @[timeSort];</span><br><span class="line">    request.predicate = predicate;</span><br><span class="line">    </span><br><span class="line">    self.resultController = [[NSFetchedResultsController alloc] initWithFetchRequest:request managedObjectContext:context sectionNameKeyPath:nil cacheName:nil];</span><br><span class="line">    self.resultController.delegate = self;</span><br><span class="line">    NSError *error = nil;</span><br><span class="line">    if ([self.resultController performFetch:&amp;error]) &#123;</span><br><span class="line">        NSLog(@&quot;%@&quot;,error);</span><br><span class="line">    &#125;</span><br><span class="line">    //NSLog(@&quot;-----%@&quot;,self.resultController.fetchedObjects);</span><br><span class="line">    [self getChatMsgArray];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#pragma mark - NSFetchedResultsControllerDelegate</span><br><span class="line">// 代理方法,当数据发生变化时调用该方法</span><br><span class="line">- (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(nullable NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(nullable NSIndexPath *)newIndexPath &#123;</span><br><span class="line">    [self relodChatMessage];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 此处获取数据库中的会话数组,对模型类进行赋值,并且设置其单个会话的frame</span><br><span class="line">/**</span><br><span class="line"> *  采用MVVM的设计模式</span><br><span class="line">    提供两个模型:</span><br><span class="line">        &gt;数据模型：存放文字数据\图片数据</span><br><span class="line">        &gt;frame模型：存放数据模型\所有子控件的frame\cell的高度</span><br><span class="line">    其中cell直接拥有一个frame模型(不要直接拥有数据模型).即:使fram模型拥有数据模型</span><br><span class="line">    在cell赋值的时候直接赋值frame模型</span><br><span class="line"> */</span><br><span class="line">- (void)getChatMsgArray &#123;</span><br><span class="line">    [self.chatMsgArray removeAllObjects];</span><br><span class="line">    for (XMPPMessageArchiving_Message_CoreDataObject *msg in self.resultController.fetchedObjects) &#123;</span><br><span class="line">        </span><br><span class="line">        ChatMessageModel *messageModel = [[ChatMessageModel alloc] init];</span><br><span class="line">        // 将模型中的上一条信息的时间戳取出来放到数据模型中处理</span><br><span class="line">        if (self.chatMsgArray.count) &#123;</span><br><span class="line">            ChatFrameModel *preChatFrameModel = self.chatMsgArray.lastObject;</span><br><span class="line">            messageModel.preMsgDate = preChatFrameModel.msg.msg.timestamp;</span><br><span class="line">        &#125;</span><br><span class="line">        // 数据模型的setter</span><br><span class="line">        messageModel.msg = msg;</span><br><span class="line">        </span><br><span class="line">        ChatFrameModel *frameModel = [[ChatFrameModel alloc] init];</span><br><span class="line">        // frame模型的setter</span><br><span class="line">        frameModel.msg = messageModel;</span><br><span class="line">        [self.chatMsgArray addObject:frameModel];</span><br><span class="line"> </span><br><span class="line">        // 图片浏览器</span><br><span class="line">        if ([msg.message.body isEqualToString:@&quot;image&quot;]) &#123;</span><br><span class="line">            XMPPElement *node = msg.message.children.lastObject;</span><br><span class="line">            // 取出消息的解码</span><br><span class="line">            NSString *base64str = node.stringValue;</span><br><span class="line">            NSData *data = [[NSData alloc]initWithBase64EncodedString:base64str options:0];</span><br><span class="line">            UIImage *image = [[UIImage alloc]initWithData:data];</span><br><span class="line">            [self.chatImageArray addObject:image];</span><br><span class="line">        &#125; </span><br><span class="line">    &#125;</span><br><span class="line">    [self.myTab reloadData];</span><br><span class="line">    [self scrollToBottom];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于业务逻辑我就不展示了,感兴趣的可以查看demo</p>
+<h3 id="4-发送语音聊天"><a href="#4-发送语音聊天" class="headerlink" title="4.发送语音聊天"></a>4.发送语音聊天</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark ******************************</span><br><span class="line">#pragma mark -- 发送语音聊天信息</span><br><span class="line">- (IBAction)sendVoiceBtn:(UIButton *)sender &#123;</span><br><span class="line">    if (CGRectGetMaxY(self.moreView.frame) == [UIScreen mainScreen].bounds.size.height) &#123;</span><br><span class="line">        self.moreView.frame = kMoreInputViewOriFrame;</span><br><span class="line">        [self.chatTextView resignFirstResponder];</span><br><span class="line">    &#125;</span><br><span class="line">    if (self.inputViewBottonConstraint.constant == 200) &#123;</span><br><span class="line">        [self.chatTextView becomeFirstResponder];</span><br><span class="line">        [self dissmissMoreInputViewWithAniation:YES];</span><br><span class="line">    &#125;</span><br><span class="line">    if (!self.sendVoiceBtn.hidden) &#123;</span><br><span class="line">        [self.chatTextView becomeFirstResponder];</span><br><span class="line">        //self.inputViewBottonConstraint.constant = 0;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if ([self.chatTextView isFirstResponder]) &#123;</span><br><span class="line">            [self.chatTextView resignFirstResponder];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    self.sendVoiceBtn.hidden = sender.selected;</span><br><span class="line">    sender.selected = !sender.selected;</span><br><span class="line">    UIImage *normalImage = sender.selected ? [UIImage imageNamed:@&quot;ToolViewKeyboard&quot;] : [UIImage imageNamed:@&quot;ToolViewInputVoice&quot;];</span><br><span class="line">    UIImage *highlightImage = sender.selected ? [UIImage imageNamed:@&quot;ToolViewKeyboardHL&quot;] : [UIImage imageNamed:@&quot;ToolViewInputVoiceHL&quot;];</span><br><span class="line">    [sender setImage:normalImage forState:UIControlStateNormal];</span><br><span class="line">    [sender setImage:highlightImage forState:UIControlStateHighlighted];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 在按钮上按下按钮开始录音</span><br><span class="line">- (IBAction)sendTouchDown:(UIButton *)sender &#123;</span><br><span class="line">    NSLog(@&quot;%s, line = %d&quot;, __FUNCTION__, __LINE__);</span><br><span class="line">    self.sendVoiceBtn.backgroundColor = [UIColor lightGrayColor];</span><br><span class="line">    // 设置提示框</span><br><span class="line">    popVoiceView *voiceV = [popVoiceView voiceAlertPopView];</span><br><span class="line">    voiceV.bounds = CGRectMake(0, 0, 150, 150);</span><br><span class="line">    CGFloat centerX = [UIScreen mainScreen].bounds.size.width / 2.0;</span><br><span class="line">    CGFloat centerY = [UIScreen mainScreen].bounds.size.height / 2.0;</span><br><span class="line">    voiceV.center = CGPointMake(centerX, centerY);</span><br><span class="line">    self.voiceView = voiceV;</span><br><span class="line">    [self.view addSubview:self.voiceView];</span><br><span class="line">    </span><br><span class="line">    // 录音</span><br><span class="line">    [self.audioRecorder record];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 在按钮上抬起手指发送语音</span><br><span class="line">- (IBAction)sendTouchUpInside:(UIButton *)sender &#123;</span><br><span class="line">    NSLog(@&quot;%s, line = %d&quot;, __FUNCTION__, __LINE__);</span><br><span class="line">    self.sendVoiceBtn.backgroundColor = BackGround243Color;</span><br><span class="line">    NSTimeInterval time = self.audioRecorder.currentTime;</span><br><span class="line">    </span><br><span class="line">    if (time &lt; 1.5) &#123;</span><br><span class="line">        // 时间小于1.5秒不发送,大于1.5秒才发送</span><br><span class="line">        // 停止录音</span><br><span class="line">        [self.audioRecorder stop];</span><br><span class="line">        // 删除录音文件</span><br><span class="line">        [self.audioRecorder deleteRecording];</span><br><span class="line">        </span><br><span class="line">        self.voiceView.voiceImageV.image = [UIImage imageNamed:@&quot;QQ20160818-3&quot;];</span><br><span class="line">        self.voiceView.voiceTitleLab.text = @&quot;说话时间太短&quot;;</span><br><span class="line">        </span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        // 停止录音</span><br><span class="line">        [self.audioRecorder stop];</span><br><span class="line">        </span><br><span class="line">        // 发送语音</span><br><span class="line">        NSString *urlStr = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];</span><br><span class="line">        urlStr = [urlStr stringByAppendingPathComponent:kRecordAudioFile];</span><br><span class="line">        NSData *voiceData = [NSData dataWithContentsOfFile:urlStr];</span><br><span class="line">        [self sendVoiceMessageWithData:voiceData bodyType:@&quot;voice&quot; withDuringTime:time];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [self.voiceView removeFromSuperview];</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">- (void)sendVoiceMessageWithData:(NSData *)data bodyType:(NSString *)type withDuringTime:(NSTimeInterval)time&#123;</span><br><span class="line">    XMPPMessage* message = [[XMPPMessage alloc] initWithType:@&quot;chat&quot; to:self.jidChatTo.jid];</span><br><span class="line">    // 将时间传过去</span><br><span class="line">    NSString *timeStr = [NSString stringWithFormat:@&quot;%f&quot;,time];</span><br><span class="line">    [message addAttributeWithName:@&quot;duringTime&quot; stringValue:timeStr];</span><br><span class="line">    [message addBody:type];</span><br><span class="line"></span><br><span class="line">    NSString *base64str = [data base64EncodedStringWithOptions:0];</span><br><span class="line"></span><br><span class="line">    XMPPElement *attachment = [XMPPElement elementWithName:@&quot;attachment&quot; stringValue:base64str];</span><br><span class="line"></span><br><span class="line">    [message addChild:attachment];</span><br><span class="line">    [[XMPPManager sharedmanager].stream sendElement:message];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 手指拖到按钮外面将要取消录音</span><br><span class="line">- (IBAction)sendDragOutside:(UIButton *)sender &#123;</span><br><span class="line">    NSLog(@&quot;%s, line = %d&quot;, __FUNCTION__, __LINE__);</span><br><span class="line">    self.voiceView.voiceImageV.image = [UIImage imageNamed:@&quot;QQ20160818-2&quot;];</span><br><span class="line">    self.voiceView.voiceTitleLab.text = @&quot;松开手指, 取消发送&quot;;</span><br><span class="line">    self.voiceView.voiceTitleLab.backgroundColor = [UIColor colorWithRed:0.826 green:0.0 blue:0.0 alpha:1.0];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 在按钮外面抬起手指取消录音</span><br><span class="line">- (IBAction)sendTouchUpOutside:(UIButton *)sender &#123;</span><br><span class="line">    NSLog(@&quot;%s, line = %d&quot;, __FUNCTION__, __LINE__);</span><br><span class="line">    [self.voiceView removeFromSuperview];</span><br><span class="line">    </span><br><span class="line">    // 停止录音</span><br><span class="line">    [self.audioRecorder stop];</span><br><span class="line">    // 删除录音文件</span><br><span class="line">    [self.audioRecorder deleteRecording];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 设置音频保存路径</span><br><span class="line">- (NSURL *)getSavePath &#123;</span><br><span class="line">    NSString *urlStr = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];</span><br><span class="line">    urlStr = [urlStr stringByAppendingPathComponent:kRecordAudioFile];</span><br><span class="line">    NSURL *url = [NSURL URLWithString:urlStr];</span><br><span class="line">    </span><br><span class="line">    return url;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *  设置音频会话</span><br><span class="line">    注意:一定要添加音频会话,不然真机上的录音时间不对,并且不能进行播放音频</span><br><span class="line"> */</span><br><span class="line">-(void)setAudioSession&#123;</span><br><span class="line">    AVAudioSession *audioSession=[AVAudioSession sharedInstance];</span><br><span class="line">    //设置为播放和录音状态，以便可以在录制完之后播放录音</span><br><span class="line">    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];</span><br><span class="line">    [audioSession setActive:YES error:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 录音文件设置</span><br><span class="line">- (NSDictionary *)getAudioSetting &#123;</span><br><span class="line">    NSMutableDictionary *dicM = [NSMutableDictionary dictionary];</span><br><span class="line">    // 设置录音格式</span><br><span class="line">    [dicM setObject:@(kAudioFormatLinearPCM) forKey:AVFormatIDKey];</span><br><span class="line">    // 设置录音采样率,8000是电话采样率,对于一般录音已经够了</span><br><span class="line">    [dicM setObject:@(8000) forKey:AVSampleRateKey];</span><br><span class="line">    // 设置通道,这里采用单声道</span><br><span class="line">    [dicM setObject:@(1) forKey:AVNumberOfChannelsKey];</span><br><span class="line">    // 每个采样点位数,分别为8,16,24,32</span><br><span class="line">    [dicM setObject:@(8) forKey:AVLinearPCMBitDepthKey];</span><br><span class="line">    // 是否使用浮点数采样</span><br><span class="line">    [dicM setObject:@(YES) forKey:AVLinearPCMIsFloatKey];</span><br><span class="line">    // ...其他设置</span><br><span class="line">    return dicM;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#pragma mark -- AVAudioRecorderDelegate</span><br><span class="line">// 录音完成</span><br><span class="line">- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag &#123;</span><br><span class="line">    //NSLog(@&quot;录音完毕&quot;);</span><br><span class="line">&#125;</span><br><span class="line">#pragma mark -- AVAudioPlayerDelegate</span><br><span class="line"></span><br><span class="line">- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag &#123;</span><br><span class="line">    NSLog(@&quot;播放完毕&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-播放语音"><a href="#5-播放语音" class="headerlink" title="5.播放语音"></a>5.播放语音</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">if ([chatFrameModel.msg.msg.message.body isEqualToString:@&quot;voice&quot;]) &#123;</span><br><span class="line">   if (self.audioPlayer.isPlaying) &#123;</span><br><span class="line">       [self.audioPlayer stop];</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   XMPPElement *node = chatFrameModel.msg.msg.message.children.lastObject;</span><br><span class="line">   // 取出消息的解码</span><br><span class="line">   NSString *base64str = node.stringValue;</span><br><span class="line">   NSData *data = [[NSData alloc]initWithBase64EncodedString:base64str options:0];</span><br><span class="line">   </span><br><span class="line">   self.audioPlayer = [[AVAudioPlayer alloc] initWithData:data error:NULL];</span><br><span class="line">   self.audioPlayer.delegate = self;</span><br><span class="line">   [self.audioPlayer play];</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="6-发送图片信息"><a href="#6-发送图片信息" class="headerlink" title="6.发送图片信息"></a>6.发送图片信息</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">XMPPMessage* message = [[XMPPMessage alloc] initWithType:@&quot;chat&quot; to:self.jidChatTo.jid];</span><br><span class="line">    // 设置bodyType类型值为image</span><br><span class="line">    //[message addAttributeWithName:@&quot;bodyType&quot; stringValue:type];</span><br><span class="line">#warning 此处采用图片,语音等传输方式为XML携带信息,所以传输速度慢,因为未搭建文件服务器,所以采用该种办法,建议采用文件服务器方式,传递URL</span><br><span class="line">    // 该处设置message的body为文件类型,后面对文件类型的判断由body来实现,其中尝试使用[message addAttributeWithName:@&quot;bodyType&quot; stringValue:type];来实现文件类型的判断但未成功,原因暂时未知</span><br><span class="line">    [message addBody:type];</span><br><span class="line">    </span><br><span class="line">    // 转换成base64的编码</span><br><span class="line">    NSString *base64str = [data base64EncodedStringWithOptions:0];</span><br><span class="line">    </span><br><span class="line">    // 设置节点内容</span><br><span class="line">    XMPPElement *attachment = [XMPPElement elementWithName:@&quot;attachment&quot; stringValue:base64str];</span><br><span class="line">    </span><br><span class="line">    // 包含子节点</span><br><span class="line">    [message addChild:attachment];</span><br><span class="line"></span><br><span class="line">#warning 此处采用的是文件服务器方式传输,但由于未建立文件服务器,所以传输对象为写死的一图片,语音等文件的url,仅供测试使用</span><br><span class="line">    //[message addBody:@&quot;http://img5.duitang.com/uploads/item/201407/24/20140724054410_5ctE2.jpeg&quot;];</span><br><span class="line">    // 发送图片消息</span><br><span class="line">    [[XMPPManager sharedmanager].stream sendElement:message];</span><br></pre></td></tr></table></figure>
+<p>7.会话内容回执<br>通过单元格代理方式来获得会话内容回执进行音频播放和图片浏览<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark ******************************</span><br><span class="line">#pragma mark --ChatCellDelegate</span><br><span class="line">- (void)getCurrentChatCell:(ChatTableViewCell *)cell withCurrentChatFrame:(ChatFrameModel *)chatFrameModel &#123;</span><br><span class="line">    //NSString *chatType = [chatFrameModel.msg.msg.message attributeStringValueForName:@&quot;bodyType&quot;];</span><br><span class="line">    if ([chatFrameModel.msg.msg.message.body isEqualToString:@&quot;image&quot;]) &#123;</span><br><span class="line">        MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];</span><br><span class="line">        NSUInteger index = 0;</span><br><span class="line">        // 如果当前单元格中的url存在,则在数组中找到与之匹配的,并找出其序号</span><br><span class="line">        if (chatFrameModel.msg.msg.body) &#123;</span><br><span class="line">            index = [self.chatImageArray indexOfObject:chatFrameModel.msg.msg.body];</span><br><span class="line">        &#125;</span><br><span class="line">        // 设置图片查看器当前查看的位置</span><br><span class="line">        [browser setCurrentPhotoIndex:index];</span><br><span class="line">        // 跳转到图片查看器</span><br><span class="line">        [self.navigationController pushViewController:browser animated:YES];</span><br><span class="line">    &#125; else if ([chatFrameModel.msg.msg.message.body isEqualToString:@&quot;voice&quot;]) &#123;</span><br><span class="line">        if (self.audioPlayer.isPlaying) &#123;</span><br><span class="line">            [self.audioPlayer stop];</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        XMPPElement *node = chatFrameModel.msg.msg.message.children.lastObject;</span><br><span class="line">        // 取出消息的解码</span><br><span class="line">        NSString *base64str = node.stringValue;</span><br><span class="line">        NSData *data = [[NSData alloc]initWithBase64EncodedString:base64str options:0];</span><br><span class="line">        </span><br><span class="line">        self.audioPlayer = [[AVAudioPlayer alloc] initWithData:data error:NULL];</span><br><span class="line">        self.audioPlayer.delegate = self;</span><br><span class="line">        [self.audioPlayer play];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="8-键盘高度"><a href="#8-键盘高度" class="headerlink" title="8.键盘高度"></a>8.键盘高度</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#pragma mak -- 更改键盘高度</span><br><span class="line">- (void)keyboardFrameChange:(NSNotification *)sender &#123;</span><br><span class="line">    // 获得键盘改变后的frame</span><br><span class="line">    NSValue *keyboardFrame = sender.userInfo[UIKeyboardFrameEndUserInfoKey];</span><br><span class="line">    CGRect rect = [keyboardFrame CGRectValue];</span><br><span class="line">    CGFloat height = CGRectGetHeight(rect);</span><br><span class="line">    // 计算聊天窗口的底部偏移量</span><br><span class="line">    if (rect.origin.y == [UIScreen mainScreen].bounds.size.height) &#123;</span><br><span class="line">        self.inputViewBottonConstraint.constant = 0;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        self.inputViewBottonConstraint.constant = height;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [UIView animateWithDuration:0.25 animations:^&#123;</span><br><span class="line">        [self.view layoutIfNeeded];</span><br><span class="line">    &#125;];</span><br><span class="line">    [self scrollToBottom];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Object-C/" rel="tag"># Object-C</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/08/22/XMPP/(%E5%8D%81%E4%BA%8C)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E8%8A%B1%E5%90%8D%E5%86%8C/" rel="prev" title="(十二)即时通讯之XMPPFramework花名册">
+      <i class="fa fa-chevron-left"></i> (十二)即时通讯之XMPPFramework花名册
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/08/22/XMPP/(%E5%8D%81%E5%9B%9B)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E6%9C%AC%E5%9C%B0%E9%80%9A%E7%9F%A5/" rel="next" title="(十四)即时通讯之XMPPFramework本地通知">
+      (十四)即时通讯之XMPPFramework本地通知 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%81%8A%E5%A4%A9%E6%A8%A1%E5%9D%97%E6%BF%80%E6%B4%BB"><span class="nav-number">2.</span> <span class="nav-text">1.聊天模块激活</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8F%91%E9%80%81%E6%96%87%E5%AD%97%E8%81%8A%E5%A4%A9%E5%86%85%E5%AE%B9"><span class="nav-number">3.</span> <span class="nav-text">2.发送文字聊天内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%8E%B7%E5%8F%96%E6%96%87%E5%AD%97%E8%81%8A%E5%A4%A9%E5%86%85%E5%AE%B9"><span class="nav-number">4.</span> <span class="nav-text">3.获取文字聊天内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%8F%91%E9%80%81%E8%AF%AD%E9%9F%B3%E8%81%8A%E5%A4%A9"><span class="nav-number">5.</span> <span class="nav-text">4.发送语音聊天</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%92%AD%E6%94%BE%E8%AF%AD%E9%9F%B3"><span class="nav-number">6.</span> <span class="nav-text">5.播放语音</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%8F%91%E9%80%81%E5%9B%BE%E7%89%87%E4%BF%A1%E6%81%AF"><span class="nav-number">7.</span> <span class="nav-text">6.发送图片信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E9%94%AE%E7%9B%98%E9%AB%98%E5%BA%A6"><span class="nav-number">8.</span> <span class="nav-text">8.键盘高度</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : '7527e2e7dc0bb92777c9c2d78cbdbb76',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

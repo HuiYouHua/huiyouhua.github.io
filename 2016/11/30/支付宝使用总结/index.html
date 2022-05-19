@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="引言 写这篇文章主要是总结一下支付宝的使用,因为最近这个项目要添加一个支付宝功能,所有的资料都是通过查看蚂蚁金服开发者平台和其他开发者写的一些资料加上自己的汇总得来的 但是呢,不幸的是这个项目不能采用第三方支付,因为购买的是虚拟产品,更新审核很大可能不会给过,有人说可以通过控制后台开关进行控制前台支付功能的隐藏,过了审核再打开开关,但是风险还是比较大的,被发现了那就GG 这个项目采用的是内购,支付">
+<meta property="og:type" content="article">
+<meta property="og:title" content="支付宝使用总结">
+<meta property="og:url" content="http://example.com/2016/11/30/%E6%94%AF%E4%BB%98%E5%AE%9D%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="HuiYouHua">
+<meta property="og:description" content="引言 写这篇文章主要是总结一下支付宝的使用,因为最近这个项目要添加一个支付宝功能,所有的资料都是通过查看蚂蚁金服开发者平台和其他开发者写的一些资料加上自己的汇总得来的 但是呢,不幸的是这个项目不能采用第三方支付,因为购买的是虚拟产品,更新审核很大可能不会给过,有人说可以通过控制后台开关进行控制前台支付功能的隐藏,过了审核再打开开关,但是风险还是比较大的,被发现了那就GG 这个项目采用的是内购,支付">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930613.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930663.png">
+<meta property="og:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930733.png">
+<meta property="article:published_time" content="2016-11-29T16:01:53.000Z">
+<meta property="article:modified_time" content="2016-11-29T16:01:53.000Z">
+<meta property="article:author" content="HuiYou Hua">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930613.png">
+
+<link rel="canonical" href="http://example.com/2016/11/30/%E6%94%AF%E4%BB%98%E5%AE%9D%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>支付宝使用总结 | HuiYouHua</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HuiYouHua" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HuiYouHua</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/HuiYouHua" class="github-corner" title="Follow me on github" aria-label="Follow me on github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/11/30/%E6%94%AF%E4%BB%98%E5%AE%9D%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/android-chrome-384x384.png">
+      <meta itemprop="name" content="HuiYou Hua">
+      <meta itemprop="description" content="iOS 开发相关日常总结记录。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HuiYouHua">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          支付宝使用总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-30 00:01:53" itemprop="dateCreated datePublished" datetime="2016-11-30T00:01:53+08:00">2016-11-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%94%AF%E4%BB%98/" itemprop="url" rel="index"><span itemprop="name">支付</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><blockquote>
+<p>写这篇文章主要是总结一下支付宝的使用,因为最近这个项目要添加一个支付宝功能,所有的资料都是通过查看蚂蚁金服开发者平台和其他开发者写的一些资料加上自己的汇总得来的</p>
+<p>但是呢,不幸的是这个项目不能采用第三方支付,因为购买的是虚拟产品,更新审核很大可能不会给过,有人说可以通过控制后台开关进行控制前台支付功能的隐藏,过了审核再打开开关,但是风险还是比较大的,被发现了那就GG</p>
+<p>这个项目采用的是内购,支付宝呢我自己研究下,这里就总结一下以后有机会的话我再尝试了,大差不差</p>
+<p>好了,废话不多说了,开始进入正题</p>
+</blockquote>
+<h2 id="一、准备工作"><a href="#一、准备工作" class="headerlink" title="一、准备工作"></a>一、准备工作</h2><p>需要的东西:</p>
+<ul>
+<li>商户唯一的PID(partner的简称):是商户与支付宝签约后,商户获得的支付宝商户唯一标识码.当商户把支付宝功能介入商户网站时会PID,以便让支付宝认证商户.</li>
+<li>账号ID(sellerID):用户购买的支付账号,订单支付金额将打入该账户,一个partner可以对应多个seller_id。</li>
+<li>下载相应的公钥私钥(加密签名使用,RSA加密)<br>其中前两个一般都是公司负责的,但是非要你弄的的话也没事:</li>
+</ul>
+<p>1.首先你需要有一个支付宝账号(最好公司的)登录<a target="_blank" rel="noopener" href="https://open.alipay.com/platform/home.htm">蚂蚁金服</a>实名认证这个支付宝账号,需要视同企业资料,成为企业支付宝账号.<br>2.登录支付宝官方网站<a target="_blank" rel="noopener" href="https://b.alipay.com/order/serviceIndex.htm">支付宝商家中心</a>,与支付宝进行签约.<br>3.然后进入开发者平台,创建应用,<a target="_blank" rel="noopener" href="https://doc.open.alipay.com/doc2/detail.htm?spm=a219a.7629140.0.0.mLiPMe&amp;treeId=197&amp;articleId=105240&amp;docType=1#s0">官方文档</a><br>4.按照官方文档走,生成公钥和私钥以及上述的几个东西</p>
+<p>注:其中RSA密钥私钥有两个,一个是pkcs8密钥和普通密钥,这里我们使用pkcs8密钥,另外公钥是用来在开发平台的应用配置中添加公钥,同时会生成一个支付宝公钥.</p>
+<h2 id="二、集成支付宝SDK"><a href="#二、集成支付宝SDK" class="headerlink" title="二、集成支付宝SDK"></a>二、集成支付宝SDK</h2><p>1.支付宝SDK下载地址为:<a target="_blank" rel="noopener" href="https://doc.open.alipay.com/doc2/detail.htm?treeId=54&amp;articleId=104509&amp;docType=1">这里</a><br>PS:另外还可以下载对应服务端SDK,各种不同的开发语言都有集成示例.</p>
+<p>2.来看看我们的SDK里需要的东西:</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930613.png" alt="支付宝SDK内的玩意.png"><br>我们需要的东西如下:</p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930663.png" alt="需要的东西.png"><br>将这几个文件放到一个文件夹中并命名为AliPaySDK拖入项目中.</p>
+<p>3.下面就是环境的配置了,这个东西网上找找,相信你可以配置成功的,就不多说了,给你两个地址好了:<br><a target="_blank" rel="noopener" href="https://doc.open.alipay.com/doc2/detail.htm?treeId=204&amp;articleId=105295&amp;docType=1">官方文档环境配置</a><br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/2aedc82c02b5">民间高手配置</a><br>出了什么问题,结合这两个就可以了.</p>
+<h2 id="三、支付宝支付流程"><a href="#三、支付宝支付流程" class="headerlink" title="三、支付宝支付流程"></a>三、支付宝支付流程</h2><p>这里是借鉴别人的支付流程了,<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/11af0e29a6a7">你看</a></p>
+<p><img src="http://huayoyu-1254261238.cossh.myqcloud.com/md/1240-20220519234930733.png" alt="支付流程.png"><br>支付过程:<br>1.用户向商城网站发起确认订单的请求<br>2.商城网站接收到请求保存订单数据到数据库或其他存储介质<br>3.返回订单确认页面,页面上应该显示订单金额等信息<br>4.用户确认支付,发起支付请求.注:支付请求时发送到支付网关(比如支付宝,网银在线等)而不是发送到商城网站<br>5.显示支付页面<br>6.用户填写认证信息(账号密码等)提交<br>7.这里有两个步骤,一个是扣款成功后页面跳转到支付结果页面(展示给用户),另一个是支付通知,这两步没有先后顺序可能同时执行,商城网站接收到支付通知后根据验证规则验证信息的有效性,并作出相应的更改操作(例:有效则更改订单为已付款装填,无效则记录非法请求信息).</p>
+<p>那么我们注意的就是第4步和第7步</p>
+<h2 id="四、客户端代码的实现"><a href="#四、客户端代码的实现" class="headerlink" title="四、客户端代码的实现"></a>四、客户端代码的实现</h2><h5 id="入口类"><a href="#入口类" class="headerlink" title="入口类"></a>入口类</h5><p>支付宝客户端打开<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)application:(UIApplication *)application</span><br><span class="line">            openURL:(NSURL *)url</span><br><span class="line">  sourceApplication:(NSString *)sourceApplication</span><br><span class="line">         annotation:(id)annotation &#123;</span><br><span class="line">    </span><br><span class="line">    if ([url.host isEqualToString:@&quot;safepay&quot;]) &#123;</span><br><span class="line">        //跳转支付宝钱包进行支付，处理支付结果</span><br><span class="line">        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) &#123;</span><br><span class="line">            NSLog(@&quot;result = %@&quot;,resultDic);</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// NOTE: 9.0以后使用新API接口</span><br><span class="line">- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary *)options</span><br><span class="line">&#123;</span><br><span class="line">    if ([url.host isEqualToString:@&quot;safepay&quot;]) &#123;</span><br><span class="line">        //跳转支付宝钱包进行支付，处理支付结果</span><br><span class="line">        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) &#123;</span><br><span class="line">            NSLog(@&quot;result = %@&quot;,resultDic);</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="生成订单信息"><a href="#生成订单信息" class="headerlink" title="生成订单信息"></a>生成订单信息</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">    *商户的唯一的parnter和seller。</span><br><span class="line">    *签约后，支付宝会为每个商户分配一个唯一的 parnter 和 seller。</span><br><span class="line">    */</span><br><span class="line"> /*============================================================================*/</span><br><span class="line">   /*=======================需要填写商户app申请的===================================*/</span><br><span class="line">   /*============================================================================*/</span><br><span class="line">   NSString *partner = PID;</span><br><span class="line">   NSString *seller = @&quot;&quot;;</span><br><span class="line">   NSString *privateKey = kPrivateKey;</span><br><span class="line">   //支付宝公钥（目前所有支付宝公钥都是这个）</span><br><span class="line">   NSString* key = @&quot;&quot;;</span><br><span class="line">   //这个方法应该是初始化公钥并保存到本地吧</span><br><span class="line">   id&lt;DataVerifier&gt; verifier = CreateRSADataVerifier(key);</span><br><span class="line">   /*============================================================================*/</span><br><span class="line">   /*============================================================================*/</span><br><span class="line">   /*============================================================================*/</span><br><span class="line">   </span><br><span class="line">   //partner和seller获取失败,提示</span><br><span class="line">   if ([partner length] == 0 ||</span><br><span class="line">       [seller length] == 0 ||</span><br><span class="line">       [privateKey length] == 0)</span><br><span class="line">   &#123;</span><br><span class="line">       UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@&quot;提示&quot;</span><br><span class="line">                                                       message:@&quot;缺少partner或者seller或者私钥。&quot;</span><br><span class="line">                                                      delegate:self</span><br><span class="line">                                             cancelButtonTitle:@&quot;确定&quot;</span><br><span class="line">                                             otherButtonTitles:nil];</span><br><span class="line">       [alert show];</span><br><span class="line">       return;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   /*</span><br><span class="line">    *生成订单信息及签名</span><br><span class="line">    */</span><br><span class="line">   //将商品信息赋予AlixPayOrder的成员变量</span><br><span class="line">   Order *order = [[Order alloc] init];</span><br><span class="line">   order.partner = partner;</span><br><span class="line">   order.sellerID = seller;</span><br><span class="line">   order.outTradeNO = @&quot;10087&quot;; //订单ID（由商家自行制定）</span><br><span class="line">   order.subject = @&quot;火车票&quot;; //商品标题</span><br><span class="line">   order.body = @&quot;这是从北京到芜湖的火车票&quot;; //商品描述</span><br><span class="line">   order.totalFee = @&quot;0.01&quot;; //商品价格</span><br><span class="line">   order.notifyURL =  @&quot;http://www.baidu.com&quot;; //回调URL</span><br><span class="line">   </span><br><span class="line">   order.service = @&quot;mobile.securitypay.pay&quot;;</span><br><span class="line">   order.paymentType = @&quot;1&quot;;</span><br><span class="line">   order.inputCharset = @&quot;utf-8&quot;;</span><br><span class="line">   order.itBPay = @&quot;30m&quot;;</span><br><span class="line">   order.showURL = @&quot;m.alipay.com&quot;;</span><br></pre></td></tr></table></figure>
+<h5 id="应用注册scheme-在AlixPayDemo-Info-plist定义URL-types"><a href="#应用注册scheme-在AlixPayDemo-Info-plist定义URL-types" class="headerlink" title="应用注册scheme,在AlixPayDemo-Info.plist定义URL types"></a>应用注册scheme,在AlixPayDemo-Info.plist定义URL types</h5><p>注意这一步<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSString *appScheme = @&quot;alisdkdemo&quot;;</span><br></pre></td></tr></table></figure></p>
+<h5 id="将商品拼接成字符串"><a href="#将商品拼接成字符串" class="headerlink" title="将商品拼接成字符串"></a>将商品拼接成字符串</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">//将商品信息拼接成字符串</span><br><span class="line">NSString *orderSpec = [order description];</span><br><span class="line">NSLog(@&quot;orderSpec = %@&quot;,orderSpec);</span><br><span class="line"></span><br><span class="line">//获取私钥并将商户信息签名,外部商户可以根据情况存放私钥和签名,只需要遵循RSA签名规范,并将签名字符串base64编码和UrlEncode</span><br><span class="line">id&lt;DataSigner&gt; signer = CreateRSADataSigner(privateKey);</span><br><span class="line">NSString *signedString = [signer signString:orderSpec];</span><br><span class="line"></span><br><span class="line">//将签名成功字符串格式化为订单字符串,请严格按照该格式</span><br><span class="line">NSString *orderString = nil;</span><br><span class="line">if (signedString != nil) &#123;</span><br><span class="line">    orderString = [NSString stringWithFormat:@&quot;%@&amp;sign=\&quot;%@\&quot;&amp;sign_type=\&quot;%@\&quot;&quot;,</span><br><span class="line">                   orderSpec, signedString, @&quot;RSA&quot;];</span><br><span class="line">    </span><br><span class="line">    [[AlipaySDK defaultService] payOrder:orderString fromScheme:appScheme callback:^(NSDictionary *resultDic) &#123;</span><br><span class="line">        NSLog(@&quot;返回结果resultDic = %@&quot;,resultDic);</span><br></pre></td></tr></table></figure>
+<h5 id="支付结果页面验证"><a href="#支付结果页面验证" class="headerlink" title="支付结果页面验证"></a>支付结果页面验证</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">            if (resultDic)</span><br><span class="line">            &#123;</span><br><span class="line">                /*</span><br><span class="line">                 9000 订单支付成功</span><br><span class="line">                 8000 正在处理中</span><br><span class="line">                 4000 订单支付失败</span><br><span class="line">                 6001 用户中途取消</span><br><span class="line">                 6002 网络连接出错</span><br><span class="line">                 */</span><br><span class="line">                if ([resultDic[@&quot;resultStatus&quot;]integerValue] == 9000)</span><br><span class="line">                    //网上很多教程到这里就结束了，因为他们没有验证返回订单签名</span><br><span class="line">                &#123;</span><br><span class="line">                    //验签</span><br><span class="line">                    //去掉返回字典中result值里面的“\\”</span><br><span class="line">                    NSString *result = [resultDic[@&quot;result&quot;] stringByReplacingOccurrencesOfString:@&quot;\\\\&quot; withString:@&quot;&quot;];</span><br><span class="line">                    //分割字符串获取订单信息和签名</span><br><span class="line">//                     [self.result componentsSeparatedByString:@&quot;&amp;sign_type=\&quot;RSA\&quot;&amp;sign=&quot;][0];</span><br><span class="line">                    NSArray *array = [result componentsSeparatedByString:@&quot;&amp;sign_type=\&quot;RSA\&quot;&amp;sign=&quot;];</span><br><span class="line">                      //返回的订单信息</span><br><span class="line">                      NSString *orderString = array[0];</span><br><span class="line">                      //返回的订单签名</span><br><span class="line">                      NSString *signedString = [array[1] substringToIndex:[array[1]length]-1];</span><br><span class="line">                      //验证返回信息与签名</span><br><span class="line">                      if ([verifier verifyString:orderString withSign:signedString])</span><br><span class="line">                      &#123;</span><br><span class="line">                          //验证签名成功，交易结果无篡改</span><br><span class="line">                          NSLog(@&quot;------------支付成功---------------&quot;);</span><br><span class="line">                      &#125;</span><br><span class="line">                      else</span><br><span class="line">                      &#123;</span><br><span class="line">                          //验签错误</span><br><span class="line">                      &#125;</span><br><span class="line">                      </span><br><span class="line">                      &#125;</span><br><span class="line">                      </span><br><span class="line">                      &#125;</span><br><span class="line">                      else</span><br><span class="line">                      &#123;</span><br><span class="line">                          //交易失败</span><br><span class="line">                      &#125;</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这里实现由上述步骤中的第4步以及第7步中的支付结果页面(这个是展示给用户的)<br><strong>注意:关于第4步的密钥加签和第7步的验证最好放到服务器端做,以保证安全</strong></p>
+<p>这个是支付请求接口的callback返回的resultDic,摆出来方便研究<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">po resultDic</span><br><span class="line">&#123;</span><br><span class="line">    memo = “&quot;;</span><br><span class="line">    result = &quot;partner=\&quot;2088121307144063\&quot;&amp;seller_id=\&quot;service@9elephas.com\&quot;&amp;out_trade_no=\&quot;10086\&quot;&amp;subject=\&quot;\U706b\U8f66\U7968\&quot;&amp;body=\&quot;\U8fd9\U662f\U4ece\U5317\U4eac\U5230\U829c\U6e56\U7684\U706b\U8f66\U7968\&quot;&amp;total_fee=\&quot;0.01\&quot;&amp;notify_url=\&quot;http://www.baidu.com\&quot;&amp;service=\&quot;mobile.securitypay.pay\&quot;&amp;payment_type=\&quot;1\&quot;&amp;_input_charset=\&quot;utf-8\&quot;&amp;it_b_pay=\&quot;30m\&quot;&amp;show_url=\&quot;m.alipay.com\&quot;&amp;success=\&quot;true\&quot;&amp;sign_type=\&quot;RSA\&quot;&amp;sign=\&quot;Qtqv2CjSf2WXdg37cLKiN0b+nCdJsAk+deB95c+qykyz1F9Zc2sglc+6/tReTNoIFbX4D3jS31KMYEuDHuwx8ibm8fyDYpAPxHsD1x6+MaoBpXAe2UtsF6v7xFGzhmieJ8hG4WYgUhxp6LrxtSBHuxreI+pjMSeaMA0qZEvJj4g=\&quot;&quot;;</span><br><span class="line">    resultStatus = 9000;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="五、接口问题"><a href="#五、接口问题" class="headerlink" title="五、接口问题"></a>五、接口问题</h2><p>这里讲述的东西还是上面所说的第4步和第7步<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 支付宝SDK支付请求接口</span><br><span class="line">- (void)payOrder:(NSString *)orderStr</span><br><span class="line">      fromScheme:(NSString *)schemeStr</span><br><span class="line">        callback:(CompletionBlock)completionBlock;</span><br></pre></td></tr></table></figure><br>这个方法是用来发送支付请求,也就是第4步中的确认支付(发起支付请求)<br>另外还有一个方法<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (void)processOrderWithPaymentResult:(NSURL *)resultUrl</span><br><span class="line">                      standbyCallback:(CompletionBlock)completionBlock;</span><br></pre></td></tr></table></figure><br>  这两方法的区别之处主要是区分你的手机有没有下载支付宝客户端,如果没有下载支付宝客户端,在你支付完成后,支付宝服务器会通过callback返回信息,反之会在standbyCallback返回信息.</p>
+<p>在上面的代码中可以看到,我们在返回信息的block中做了验签操作,当然这个最好是放在服务器端进行.我们除了在这里做验签操作之外,我们还需要做些可视化的操作,比如说通知用户这笔交易的成功与否,需要给用户展示什么样的东西等等…(注意,我们这里还没有对服务器数据库等做更新订单的操作)</p>
+<p>同时当我们阅读<a target="_blank" rel="noopener" href="https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.A8CMxI&amp;treeId=193&amp;articleId=105302&amp;docType=1">开放平台文档</a>的时候会发现他有两种通知,一种是客户端同步返回,一种是支付结果异步通知,其主要区别如下:<br>其官方文档是这样说的:</p>
+<blockquote>
+<p>支付宝SDK对商户的请求支付(payOrder方法)数据处理完成后,会将结果同步反馈给商户app端.<br><strong>同步返回的数据，商户可以按照下文描述的方式在服务端<br>验证，验证通过后，可以认为本次用户付款成功。有些时候会出现商户app在支付宝付款阶段被关闭导致无法正确收到同步结果，此时支付结果可以完全依赖服务端的异步通知。</strong><br><strong>由于同步通知和异步通知都可以作为支付完成的凭证，且异步通知支付宝一定会确保发送给商户服务端。为了简化集成流程，商户可以将同步结果仅仅作为一个支付结束的通知（忽略执行校验），实际支付是否成功，完全依赖服务端异步通知。
+</strong></p>
+</blockquote>
+<p>这里我来解释下,意思就是说当你支付完成后,支付宝页面会自动跳转到之前的界面,但是会有这样的情况发生,就是当你界面还没跳转时,用户自己将该页面关闭,那就无法正确的收到同步结果了,因此这里还必须得采用服务器端异步通知来保持订单的同步.</p>
+<p>至于同步操作就不多说了,在这里我们主要做两件事,一件就是验签,保证订单的可靠性,另外就是一些可视化操作,让用户知道交易成功与否.<br>这里是官方文档对于客户端同步返回的介绍:</p>
+<blockquote>
+<p><strong>第四步：</strong> 验证签名是否合法：<br>使用各自语言对应的SHA1WithRSA签名验证函数，传入签名的原始字符串、支付宝公钥、签名类型RSA、签名字符进行合法性验证。<br><strong>第五步： 在第四步签名验证通过后，必须严格按照如下的描述校验通知参数的合法性：</strong><br><strong>1、商户需要验证该通知数据中的out_trade_no是否为商户系统中创建的订单号；2、判断total_amount是否确实为该订单的实际金额（即商户订单创建时的金额）；3、校验通知中的seller_id（或者seller_email) 是否为out_trade_no这笔单据对应的操作方（有的时候，一个商户可能有多个seller_id/seller_email）；4、验证app_id是否为该商户本身。上述1、2、3、4有任何一个验证不通过，则表明同步校验结果是无效的，只有全部验证通过后，才可以认定买家付款成功。</strong></p>
+</blockquote>
+<h2 id="六、支付结果异步通知"><a href="#六、支付结果异步通知" class="headerlink" title="六、支付结果异步通知"></a>六、支付结果异步通知</h2><blockquote>
+<p>看官方文档中的介绍:<strong>对于App支付产生的交易，支付宝会根据原始支付API中传入的异步通知地址notify_url，通过POST请求的形式将支付结果作为参数通知到商户系统。</strong></p>
+</blockquote>
+<p>这里的异步通知地址就是之前构建订单信息中的回调地址notify_url</p>
+<p>再看,服务器异步通知页面特性:</p>
+<blockquote>
+<p>必须保证服务器异步通知页面（notify_url）上无任何字符，如空格、HTML标签、开发系统自带抛出的异常提示信息等；</p>
+<p>支付宝是用POST方式发送通知信息，因此该页面中获取参数的方式，如：request.Form(“out_trade_no”)、$_POST[‘out_trade_no’]；</p>
+<p>支付宝主动发起通知，该方式才会被启用；</p>
+<p>只有在支付宝的交易管理中存在该笔交易，且发生了交易状态的改变，支付宝才会通过该方式发起服务器通知（即时到账交易状态为“等待买家付款”的状态默认是不会发送通知的）；</p>
+<p>服务器间的交互，不像页面跳转同步通知可以在页面上显示出来，这种交互方式是不可见的；</p>
+<p>第一次交易状态改变（即时到账中此时交易状态是交易完成）时，不仅会返回同步处理结果，而且服务器异步通知页面也会收到支付宝发来的处理结果通知；</p>
+<p>程序执行完后必须打印输出“success”（不包含引号）。如果商户反馈给支付宝的字符不是success这7个字符，支付宝服务器会不断重发通知，直到超过24小时22分钟。一般情况下，25小时以内完成8次通知（通知的间隔频率一般是：4m,10m,10m,1h,2h,6h,15h）；</p>
+<p>程序执行完成后，该页面不能执行页面跳转。如果执行页面跳转，支付宝会收不到success字符，会被支付宝服务器判定为该页面程序运行出现异常，而重发处理结果通知；</p>
+<p>cookies、session等在此页面会失效，即无法获取这些数据；</p>
+<p>该方式的调试与运行必须在服务器上，即互联网上能访问；<br>该方式的作用主要防止订单丢失，即页面跳转同步通知没有处理订单更新，它则去处理；</p>
+<p>当商户收到服务器异步通知并打印出success时，服务器异步通知参数notify_id才会失效。也就是说在支付宝发送同一条异步通知时（包含商户并未成功打印出success导致支付宝重发数次通知），服务器异步通知参数notify_id是不变的。</p>
+</blockquote>
+<p>这里需要注意的是:<br>他是当订单状态发生变化时,支付宝服务器才会通知这个页面,然后在这个页面做验签,更新服务器数据库等操作.<br>另外验签通过后需要返回success,不然会重复通知.</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这里总结一下,支付宝这一块最重要的应该就是上面说的确认支付和返回结果页面以及支付通知信息这一块,搞定了就不难了,当然还有RSA算法,有时间我去研究研究,这个不是重点</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS/" rel="tag"># iOS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/08/22/XMPP/(%E5%8D%81%E5%9B%9B)%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E4%B9%8BXMPPFramework%E6%9C%AC%E5%9C%B0%E9%80%9A%E7%9F%A5/" rel="prev" title="(十四)即时通讯之XMPPFramework本地通知">
+      <i class="fa fa-chevron-left"></i> (十四)即时通讯之XMPPFramework本地通知
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/11/28/Cocoapods%E5%BB%BA%E7%AB%8B%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93/" rel="next" title="Cocoapods建立远程仓库">
+      Cocoapods建立远程仓库 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number"></span> <span class="nav-text">一、准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%9B%86%E6%88%90%E6%94%AF%E4%BB%98%E5%AE%9DSDK"><span class="nav-number"></span> <span class="nav-text">二、集成支付宝SDK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%94%AF%E4%BB%98%E5%AE%9D%E6%94%AF%E4%BB%98%E6%B5%81%E7%A8%8B"><span class="nav-number"></span> <span class="nav-text">三、支付宝支付流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number"></span> <span class="nav-text">四、客户端代码的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%A5%E5%8F%A3%E7%B1%BB"><span class="nav-number">0.0.1.</span> <span class="nav-text">入口类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%95%E4%BF%A1%E6%81%AF"><span class="nav-number">0.0.2.</span> <span class="nav-text">生成订单信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%B3%A8%E5%86%8Cscheme-%E5%9C%A8AlixPayDemo-Info-plist%E5%AE%9A%E4%B9%89URL-types"><span class="nav-number">0.0.3.</span> <span class="nav-text">应用注册scheme,在AlixPayDemo-Info.plist定义URL types</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%86%E5%95%86%E5%93%81%E6%8B%BC%E6%8E%A5%E6%88%90%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">0.0.4.</span> <span class="nav-text">将商品拼接成字符串</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%94%AF%E4%BB%98%E7%BB%93%E6%9E%9C%E9%A1%B5%E9%9D%A2%E9%AA%8C%E8%AF%81"><span class="nav-number">0.0.5.</span> <span class="nav-text">支付结果页面验证</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%8E%A5%E5%8F%A3%E9%97%AE%E9%A2%98"><span class="nav-number"></span> <span class="nav-text">五、接口问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%94%AF%E4%BB%98%E7%BB%93%E6%9E%9C%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5"><span class="nav-number"></span> <span class="nav-text">六、支付结果异步通知</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="HuiYou Hua"
+      src="/images/android-chrome-384x384.png">
+  <p class="site-author-name" itemprop="name">HuiYou Hua</p>
+  <div class="site-description" itemprop="description">iOS 开发相关日常总结记录。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HuiYou Hua</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b427abb3ad529e52476# GitHub Application Client ID',
+      clientSecret: '046b26711bb10fa1c5c91c974cde8e00908787d7# GitHub Application Client Secret',
+      repo        : 'huiyouhua.github.io# Repository name to store issues',
+      owner       : 'HuiYouHua# GitHub repo owner',
+      admin       : ['HuiYouHua# GitHub repo owner and collaborators, only these guys can initialize gitHub issues'],
+      id          : 'e8b1bd1f6d429b99b9be7de0fe4283ab',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>
